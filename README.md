@@ -6,7 +6,7 @@
 
 # Typesharp
 
-![Discord](https://discord.com/api/guilds/750186214690258975/embed.png)
+[![Discord](https://discord.com/api/guilds/750186214690258975/embed.png)](https://discord.gg/NcX3QgN6hp)
 
 Typesharp is a typesafe compiled langauge aiming to replace C++ and GoLang! <br />
 You can view the [documentation here](https://github.com/TypeSharp/Documentation).
