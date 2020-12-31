@@ -1,6 +1,6 @@
 <div align="center">
   <p>
-    <img width="150" alt="portfolio_view" src="https://raw.githubusercontent.com/TypeSharp/Typesharp/master/assets/typesharplogo.png?token=AD7GXXROFYURSNASN2PZKFK75V624">
+    <img width="150" alt="portfolio_view" src="https://raw.githubusercontent.com/TypeSharp/Typesharp/master/assets/typesharplogo.png?token=AD7GXXTS4DUDPEULYL4S22275WAIA">
   </p>
 </div>
 
