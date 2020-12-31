@@ -42,5 +42,6 @@ pub enum Numeric {
      // probably going to allow types for: i64 numerically. Compiler will detect?
      IntegerLiteralBig(i64),
 
+     // idk wtf you would need this for but, its there lmfao
      ItegerLiteralSigned128(i128)
 }
