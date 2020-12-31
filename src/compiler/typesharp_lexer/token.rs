@@ -1,9 +1,9 @@
-use crate::{ compiler::typesharp_ast::* };
+use crate::{ compiler::typesharp_ast::{ Span, Position } };
 
 pub struct Token {
      kind: TokenKind,
-     position: usize,
-     file: Box<str>
+     span: Span,
+     position: Position
 }
 
 pub enum TokenKind {
@@ -44,4 +44,10 @@ pub enum Numeric {
 
      // idk wtf you would need this for but, its there lmfao
      ItegerLiteralSigned128(i128)
+}
+
+impl Token {
+     pub fn new(kind: TokenKind, span: Span) -> Self {
+          return Token { kind: kind, span: span, position: span.into_position() }
+     }
 }

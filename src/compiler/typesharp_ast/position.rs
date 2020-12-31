@@ -52,6 +52,10 @@ impl Span {
           return self.start <= other.start && self.end >= other.end;
      }
 
+     pub fn into_position(&self) -> Position {
+          return self.start.clone();
+     }
+
      // to-do: Shrink
 
      pub fn verify(self) -> bool {
