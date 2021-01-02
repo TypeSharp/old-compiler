@@ -103,6 +103,43 @@ pub enum ComparisonOp {
 }
 
 // todo: AssignmentOps?
+pub enum AssignmentOp {
+     // x += y
+     Add,
+
+     // x -= y
+     Sub,
+
+     // x *= y
+     Mul,
+
+     // x /= y
+     Div,
+
+     // x %= y
+     Rem,
+
+     And,
+
+     Or,
+
+     Xor,
+
+     Sh1,
+
+     Shr,
+
+     Ushr,
+
+     // [EXPERIMENT] x &&= y
+     BoolAnd,
+
+     // [EXPERIMENT] x ||= y
+     BoolOr,
+
+     // [EXPERIMENT] x ??= y : Support may not be in future versions
+     Coalesce,
+}
 
 pub enum Numeric {
      // @reference https://doc.rust-lang.org/beta/reference/types/numeric.html
@@ -176,7 +213,11 @@ pub enum TokenKind {
 
      BinaryOpLiteral(BinOp),
 
-     UnaryOpLiteral(UnaryOp)
+     UnaryOpLiteral(UnaryOp),
+
+     GenericType(Box<str>),
+
+     AssignmentLiteral(AssignmentOp)
 }
 
 impl Token {
