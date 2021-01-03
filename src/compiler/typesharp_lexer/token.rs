@@ -1,4 +1,5 @@
 use crate::{ compiler::typesharp_ast::{ Span, Position } };
+use crate::{ compiler::typesharp_lexer::Cursor };
 
 pub struct Token {
      kind: TokenKind,
@@ -233,4 +234,10 @@ impl Token {
      pub fn new(kind: TokenKind, span: Span) -> Self {
           return Token { kind: kind, span: span, position: span.into_position() }
      }
+}
+
+/// Tokenize an input into a iterator of tokens.
+pub fn tokenize(mut input: &str) {
+     let mut cursor = Cursor::new(input);
+
 }
