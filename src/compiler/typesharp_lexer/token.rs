@@ -142,21 +142,30 @@ pub enum AssignmentOp {
 }
 
 pub enum Numeric {
-     // @reference https://doc.rust-lang.org/beta/reference/types/numeric.html
-     // Floating number
+     /// @reference https://doc.rust-lang.org/beta/reference/types/numeric.html
+     /// Floating number
      FloatLiteral(f32),
 
-     // Floating number that is larger than a float
+     /// Floating number that is larger than a float
      DoubleLiteral(f64),
 
-     // Integer: const blah: int = 13910;
+     /// Integer: const blah: int = 13910;
      IntegerLiteral(i32),
 
-     // probably going to allow types for: i64 numerically. Compiler will detect?
+     /// probably going to allow types for: i64 numerically. Compiler will detect?
      IntegerLiteralBig(i64),
 
-     // idk wtf you would need this for but, its there lmfao
-     ItegerLiteralSigned128(i128)
+     /// idk wtf you would need this for but, its there lmfao
+     ItegerLiteralSigned128(i128),
+
+     /// Any number that starts with: "0b".
+     Binary,
+
+     /// Any number that starts with: "0o".
+     Octal,
+
+     /// Any number that starts with: "0x".
+     Hexadecimal,
 }
 
 pub enum Comment {
