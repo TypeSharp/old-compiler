@@ -8,7 +8,7 @@
 
 [![Discord](https://discord.com/api/guilds/750186214690258975/embed.png)](https://discord.gg/NcX3QgN6hp)
 
-Typesharp is a typesafe compiled langauge written in rustlang aiming to memory safe and fast! <br />
+Typesharp is a typesafe compiled language written in rustlang aiming to memory safe and fast! <br />
 You can view the [documentation here](https://github.com/TypeSharp/Documentation).
 
 ## Installation
