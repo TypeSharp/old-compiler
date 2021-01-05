@@ -318,6 +318,12 @@ impl KeyWord {
      }
 }
 
+impl From<&'static str> for KeyWord {
+     fn from(m: &'static str) -> KeyWord {
+          return KeyWord::from_str(m);
+     }
+}
+
 pub struct KeyWordError;
 impl fmt::Display for KeyWordError {
      fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
