@@ -69,7 +69,7 @@ impl<'a> Cursor<'a> {
           return self.chars.as_str().is_empty();
      }
 
-     /// Consumes chars until the predicate returns false or the end of file is met. 
+     /// Consumes chars until the predicate returns false or the end of file is met.
      pub fn consume_while(&mut self, mut pred: impl FnMut(char) -> bool) {
           while pred(self.first()) && !self.is_eof() {
                self.peek();
