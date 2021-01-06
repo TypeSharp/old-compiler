@@ -186,9 +186,6 @@ pub enum KeyWord {
      Union,
      Implements,
      Interface,
-
-     /// Reserved for compiler, do not use this
-     Unknown,
 }
 
 impl KeyWord {
@@ -250,8 +247,7 @@ impl KeyWord {
                Self::Protected => "protected",
                Self::Union => "union",
                Self::Implements => "implements",
-               Self::Interface => "interface",
-               Self::Unknown => "unknown"
+               Self::Interface => "interface"
           }
      }
 
@@ -313,7 +309,7 @@ impl KeyWord {
                "union" => Self::Union,
                "implements" => Self::Implements,
                "interface" => Self::Interface,
-               _ => Self::Unknown
+               _ => panic!("Unknown Keyword!")
           }
      }
 }
@@ -343,7 +339,6 @@ impl error::Error for KeyWord {
 
 impl fmt::Display for KeyWord {
      fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-          ///return fmt::Display::fmt(self.as_str(), f);
-          return write!(f, "Not Implemented");
+          return fmt::Display::fmt(self.as_str(), f);
      }
 }
