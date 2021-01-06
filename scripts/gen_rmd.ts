@@ -43,7 +43,7 @@ const DESCRIPT: any = (await exists(path.resolve(Deno.cwd(), 'scripts/descriptio
 	: {};
 for (let entry of Deno.readDirSync(PATH)) {
 	if (entry.isDirectory) {
-		console.log("Generating readme for: " + entry.name);
+		console.log("%cGenerating ReadMe for: " + entry.name + '...', "color: #fcd041");
 		const descriptions: DescEnt[] = await getDescriptions(path.resolve(PATH, entry.name));
 		const entryCapital: string = entry.name.split('')[0].toUpperCase() + entry.name.split('').slice(1).join('');
 		const entryDesc: string = DESCRIPT[entry.name] || "No Description.";
@@ -55,5 +55,6 @@ for (let entry of Deno.readDirSync(PATH)) {
 			fileContents += `\n - **[${desc.name}](${source}${desc.name})** - ${desc.description}`;
 		}
 		Deno.writeFileSync(path.resolve(PATH, entry.name + "/Readme.md"), new TextEncoder().encode(fileContents));
+		console.log("%cDone with: " + entry.name, "color: #41fc92");
 	}
 }
