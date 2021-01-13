@@ -1,5 +1,5 @@
 use crate::{ compiler::typesharp_ast::{ Span, Position } };
-use crate::{ compiler::typesharp_lexer::Cursor };
+use crate::{ compiler::typesharp_ast::Cursor };
 
 pub struct Token {
      kind: TokenKind,

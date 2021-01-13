@@ -5,6 +5,8 @@ use std::{ fmt, error };
 #[derive(Debug)]
 pub enum KeyWord {
      /// Keywords available in all versions of typesharp.
+	/// Asm, allows use for inline assembly
+	Asm,
 
      /// Await, used for synchronizing load.
      Await,
@@ -192,6 +194,7 @@ impl KeyWord {
      pub fn as_str(&self) -> &'static str {
           // To-Do
           match self {
+			Self::Asm => "asm",
                Self::Async => "async",
                Self::Await => "await",
                Self::As => "as",
@@ -253,6 +256,7 @@ impl KeyWord {
 
      pub fn from_str(name: &'static str) -> KeyWord {
           match name {
+			"Asm" => Self::Asm,
                "async" => Self::Async,
                "await" => Self::Await,
                "as" => Self::As,
