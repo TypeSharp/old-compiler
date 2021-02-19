@@ -170,24 +170,24 @@ pub enum Numeric {
 }
 
 pub enum Comment {
-     // Line of the comment
-     Line,
+     /// Line of the comment
+     Line(Span),
 
-     // Block
-     Block,
+     /// Block
+     Block(String),
 }
 
 pub enum Delimiter {
-     // Parenthesis, either "(" or ")"
+     /// Parenthesis, either "(" or ")"
      Paren,
 
-     // Bracket, either "[" or "]"
+     /// Bracket, either "[" or "]"
      Bracket,
 
-     // Brace, either "{" or "}"
+     /// Brace, either "{" or "}"
      Brace,
 
-     // No delimiter
+     /// No delimiter
      NoDelim,
 }
 
@@ -219,6 +219,9 @@ pub enum TokenKind {
      // Comment literal
      CommentLiteral(Comment),
 
+	// Using this until i get comments situated.
+	Comment,
+
      DelimiterLiteral(Delimiter),
 
      BinaryOpLiteral(BinOp),
@@ -227,7 +230,10 @@ pub enum TokenKind {
 
      GenericType(Box<str>),
 
-     AssignmentLiteral(AssignmentOp)
+     AssignmentLiteral(AssignmentOp),
+
+	// Unknown token not expected by our lexer
+	Unknown
 }
 
 impl Token {
@@ -236,8 +242,64 @@ impl Token {
      }
 }
 
-/// Tokenize an input into a iterator of tokens.
-pub fn tokenize(mut input: &str) {
-     let mut cursor = Cursor::new(input);
+// I don't want to do this lallalalaala
+// impl From<&'static str> for Token {
+//
+// }
 
+impl Cursor<'_> {
+	/**
+	fn consume_token(&mut self) -> Token {
+		let nchar = self.peek().unwrap();
+		let kind = match nchar {
+			'/' => match self.first() {
+				'/' => panic!("You're supposed to do something?"),
+				_ => BinOp::Slash // we should change this, this is bad.
+			}
+		}
+	}*/
+
+	pub fn consume_comment(&mut self, inline: bool) -> Token {
+		if inline == true {
+			// consume while
+			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
+			self.consume_while(|c| c != '\n');
+			return Token {
+				kind: TokenKind::Comment,
+				span: Span::new(initpos, self.pos),
+				position: initpos
+			};
+		} else {
+			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
+			self.consume_while(|c| c != '*');
+			return Token {
+				kind: TokenKind::Comment,
+				span: Span::new(initpos, self.pos),
+				position: initpos
+			};
+		}
+	}
+}
+
+/// Tokenize an input into a iterator of tokens.
+pub fn tokenize(input: &str) -> Vec<Token> {
+     let mut cursor = Cursor::new(input);
+	let mut tokens: Vec<Token> = Vec::new();
+
+	while !cursor.is_eof() {
+		let kind = cursor.peek().unwrap_or_default();
+		let token: Token = match kind {
+			// comments
+			'/' => match cursor.first() {
+				'/' => cursor.consume_comment(true),
+				'*' => cursor.consume_comment(false),
+				_ => Token::new(TokenKind::BinaryOpLiteral(BinOp::Slash), Span::from(cursor.pos))// probably an op
+			},
+			_ => Token::new(TokenKind::Unknown, Span::from(cursor.pos))
+		};
+
+		tokens.push(token);
+	}
+
+	return tokens;
 }

@@ -1,4 +1,5 @@
 use std::{ fmt, cmp::Ordering };
+use crate::{ compiler::typesharp_ast::cursor::EOF };
 
 /**
  * This is the position that is lexed.
@@ -23,6 +24,18 @@ impl Position {
                column: column
           }
      }
+
+	pub fn increment(&mut self, c: char) -> bool {
+		if c == '\n' {
+			self.line = self.line + 1;
+			return true;
+		} else if c == EOF {
+			return false;
+		} else {
+			self.column = self.column + 1;
+			return true;
+		}
+	}
 }
 
 impl fmt::Display for Position {

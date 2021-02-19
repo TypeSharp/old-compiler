@@ -1,9 +1,11 @@
 use std::str::Chars;
+use crate::{ compiler::typesharp_ast::{ Position } };
 
 pub struct Cursor<'a> {
      init_length: usize,
      chars: Chars<'a>,
-     previous: char
+     previous: char,
+	pub pos: Position
 }
 
 pub const EOF: char = '\0';
@@ -15,7 +17,8 @@ impl<'a> Cursor<'a> {
           Cursor {
                init_length: input.len(),
                chars: input.chars(),
-               previous: EOF
+               previous: EOF,
+			pos: Position::new(0, 0)
           }
      }
 
@@ -25,6 +28,7 @@ impl<'a> Cursor<'a> {
           let c: char = self.chars.next()?;
 
           self.previous = c;
+		self.pos.increment(c);
 
           return Some(c);
      }
