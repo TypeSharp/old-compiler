@@ -432,7 +432,7 @@ pub fn tokenize(input: &str) -> Vec<Token> {
 			' ' => Token::new(TokenKind::WhiteSpace, Span::from(cursor.pos), None),
 
 			// unknown
-			_ => Token::new(TokenKind::Unknown, Span::from(cursor.pos), None)
+			_ => cursor.consume_token() //.unwrap_or(token!(TokenKind::Unknown))
 		};
 
 		tokens.push(token);
