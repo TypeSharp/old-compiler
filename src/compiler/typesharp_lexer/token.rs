@@ -1,10 +1,9 @@
-use crate::{ compiler::typesharp_ast::{ Span, Position } };
-use crate::{ compiler::typesharp_ast::Cursor };
+use crate::{ compiler::typesharp_ast::{ Span, Position, KeyWord, Cursor } };
 
 pub struct Token {
      pub kind: TokenKind,
      pub span: Span,
-     pub position: Option<Position>
+     pub position: Position
 }
 
 // Binary Operators
@@ -198,6 +197,8 @@ pub enum TokenKind {
      // End of file
      EOF,
 
+	Keyword(KeyWord),
+
      // A identifier (const x = 0) where x is the identifier
      Identifier(Box<str>),
 
@@ -242,8 +243,23 @@ pub enum TokenKind {
 
 impl Token {
      pub fn new(kind: TokenKind, span: Span, pos: Option<Position>) -> Self {
-          return Token { kind: kind, span: span, position: pos }
+          return Token { kind: kind, span: span, position: pos.unwrap_or(Position::new(0, 0)) }
      }
+
+	pub fn build(kind: TokenKind, pos: Position) -> Self {
+		return Token::new(kind, Span::from(pos), Some(pos));
+	}
+}
+
+// A macro utility for ease of use with token.
+macro_rules! token {
+	// used for building without chaos
+	($kind: expr, $span: expr) => {
+		Token::new($kind, $span, None);
+	};
+	() => {
+		Token::build(TokenKind::Unknown, Position::new(0, 0));
+	};
 }
 
 impl std::fmt::Display for TokenKind {
@@ -264,36 +280,102 @@ impl std::fmt::Display for TokenKind {
 // }
 
 impl Cursor<'_> {
-	/**
-	fn consume_token(&mut self) -> Token {
-		let nchar = self.peek().unwrap();
-		let kind = match nchar {
-			'/' => match self.first() {
-				'/' => panic!("You're supposed to do something?"),
-				_ => BinOp::Slash // we should change this, this is bad.
-			}
-		}
-	}*/
+	// consumes a keyword or identifier
+	pub fn consume_keyword_or_identifier(&mut self) -> Token {
+		let init_pos: Position = self.pos;
+		// consume and preserve until next space
+		let identifier: String = self.consume_segment(|c| !c.is_whitespace() || !c.is_ascii_alphanumeric());
+		let span: Span = Span::new(init_pos, self.pos);
 
+		match &identifier[..] {
+			// refer to keywords for this
+			"as" => token!(TokenKind::Keyword(KeyWord::As), span),
+			"asm" => token!(TokenKind::Keyword(KeyWord::Asm), span),
+			"async" => token!(TokenKind::Keyword(KeyWord::Async), span),
+			"await" => token!(TokenKind::Keyword(KeyWord::Await), span),
+			"break" => token!(TokenKind::Keyword(KeyWord::Break), span),
+			"case" => token!(TokenKind::Keyword(KeyWord::Case), span),
+			"catch" => token!(TokenKind::Keyword(KeyWord::Catch), span),
+			"class" => token!(TokenKind::Keyword(KeyWord::Class), span),
+			"continue" => token!(TokenKind::Keyword(KeyWord::Continue), span),
+			"const" => token!(TokenKind::Keyword(KeyWord::Const), span),
+			"default" => token!(TokenKind::Keyword(KeyWord::Default), span),
+			// [EXPERIMENT] See: https://github.com/TypeSharp/Typesharp/issues/1
+			"delete" => token!(TokenKind::Keyword(KeyWord::Delete), span),
+			"else" => token!(TokenKind::Keyword(KeyWord::Else), span),
+			"enum" => token!(TokenKind::Keyword(KeyWord::Enum), span),
+			"export" => token!(TokenKind::Keyword(KeyWord::Export), span),
+			"extern" => token!(TokenKind::Keyword(KeyWord::Extern), span),
+			// May change in the future
+			"external" => token!(TokenKind::Keyword(KeyWord::Extern), span),
+			"extends" => token!(TokenKind::Keyword(KeyWord::Extends), span),
+			"for" => token!(TokenKind::Keyword(KeyWord::For), span),
+			"function" => token!(TokenKind::Keyword(KeyWord::Function), span),
+			"fn" => token!(TokenKind::Keyword(KeyWord::Fn), span),
+			"if" => token!(TokenKind::Keyword(KeyWord::If), span),
+			"in" => token!(TokenKind::Keyword(KeyWord::In), span),
+			"instanceof" => token!(TokenKind::Keyword(KeyWord::InstanceOf), span),
+			"import" => token!(TokenKind::Keyword(KeyWord::Import), span),
+			"let" => token!(TokenKind::Keyword(KeyWord::Let), span),
+			"new" => token!(TokenKind::Keyword(KeyWord::New), span),
+			"of" => token!(TokenKind::Keyword(KeyWord::Of), span),
+			// [EXPERIMENT]
+			// Todo: Add checks and feature gates
+			"package" => token!(TokenKind::Keyword(KeyWord::Package), span),
+			"return" => token!(TokenKind::Keyword(KeyWord::Return), span),
+			"self" => token!(TokenKind::Keyword(KeyWord::SelfKeyword), span),
+			"static" => token!(TokenKind::Keyword(KeyWord::Static), span),
+			"super" => token!(TokenKind::Keyword(KeyWord::Super), span),
+			"switch" => token!(TokenKind::Keyword(KeyWord::Switch), span),
+			"trait" => token!(TokenKind::Keyword(KeyWord::Trait), span),
+			"this" => token!(TokenKind::Keyword(KeyWord::This), span),
+			"throw" => token!(TokenKind::Keyword(KeyWord::Throw), span),
+			"type" => token!(TokenKind::Keyword(KeyWord::Type), span),
+			"try" => token!(TokenKind::Keyword(KeyWord::Try), span),
+			"where" => token!(TokenKind::Keyword(KeyWord::Where), span),
+			"while" => token!(TokenKind::Keyword(KeyWord::While), span),
+
+			// Abstractions are here as i dont plan on implementing them until all of the above is done.
+			// I also believe this will change a lot so that is antoher reason I am leaving this here.
+
+			// [EXPERIMENTAL] https://github.com/TypeSharp/Typesharp/issues/10
+			"final" => token!(TokenKind::Keyword(KeyWord::Final), span),
+			"finally" => token!(TokenKind::Keyword(KeyWord::Finally), span),
+			"override" => token!(TokenKind::Keyword(KeyWord::Override), span),
+			"typeof" => token!(TokenKind::Keyword(KeyWord::Typeof), span),
+			"yield" => token!(TokenKind::Keyword(KeyWord::Yield), span),
+			"public" => token!(TokenKind::Keyword(KeyWord::Public), span),
+			// Pub may not be used, it is reserved under keyword incase it is
+			// the pub keyword will be treated as "public" for now.
+			"pub" => token!(TokenKind::Keyword(KeyWord::Public), span),
+			"private" => token!(TokenKind::Keyword(KeyWord::Private), span),
+			"protected" => token!(TokenKind::Keyword(KeyWord::Protected), span),
+
+			// Types that aren't compiled are here as well for the same reason that abstractions
+			// are below everything else.
+
+			// Unions are complex types, and are currently reserved.
+			"union" => token!(TokenKind::Keyword(KeyWord::Union), span),
+			"implements" => token!(TokenKind::Keyword(KeyWord::Implements), span),
+			"interface" => token!(TokenKind::Keyword(KeyWord::Interface), span),
+
+			// Wasn't a keyword, it was an identifier
+			_ => token!(TokenKind::Identifier(identifier.into_boxed_str()), span)
+		}
+	}
+
+	/// Consumes an inline or multiline comment.
 	pub fn consume_comment(&mut self, inline: bool) -> Token {
 		if inline == true {
 			// consume while
 			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
 			self.consume_while(|c| c != '\n');
-			return Token {
-				kind: TokenKind::Comment,
-				span: Span::new(initpos, self.pos),
-				position: None
-			};
+			return token!(TokenKind::Comment, Span::new(initpos, self.pos));
 		} else {
 			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
 			self.peek(); // we need this to consume this old char.
 			self.consume_while(|c| c != '*');
-			return Token {
-				kind: TokenKind::Comment,
-				span: Span::new(initpos, self.pos),
-				position: None
-			};
+			return token!(TokenKind::Comment, Span::new(initpos, self.pos));
 		}
 	}
 

@@ -79,4 +79,13 @@ impl<'a> Cursor<'a> {
                self.peek();
           }
      }
+
+	/// Consumes chars until the predicate returns false, or until the end of file is met, and returns the offspring.
+	pub fn consume_segment(&mut self, mut pred: impl FnMut(char) -> bool) -> String {
+		let mut segment = String::new();
+		while !self.is_eof() && pred(self.first()) {
+			segment.push(self.peek().unwrap());
+		}
+		return segment;
+	}
 }
