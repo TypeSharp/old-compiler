@@ -280,7 +280,16 @@ impl std::fmt::Display for TokenKind {
 // }
 
 impl Cursor<'_> {
-	// consumes a keyword or identifier
+	/// Definitely tries to consume a token.
+	/// If it can't, we panic.
+	pub fn consume_token(&mut self) -> Token {
+		return token!();
+	}
+
+	/// Indefinitely consume until we match whitespace.
+	/// This will resolve keywords into tokens if found,
+	/// if not found, will return a token in the form of a
+	/// **VALID** identifier.
 	pub fn consume_keyword_or_identifier(&mut self) -> Token {
 		let init_pos: Position = self.pos;
 		// consume and preserve until next space
