@@ -15,10 +15,6 @@ impl Position {
      #[inline]
      #[track_caller]
      pub fn new(line: u32, column: u32) -> Self {
-          if line <= 0 || column <= 0 {
-               panic!("Column or Line position can not be less than or equal to 0.");
-          }
-
           return Self {
                line: line,
                column: column

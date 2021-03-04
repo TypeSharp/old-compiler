@@ -1,11 +1,10 @@
 [package]
-name = "Typesharp"
+name = "runner"
 version = "0.1.0"
-authors = ["John Bergman <olybear9@gmail.com>"]
+authors = ["Olybear9 <olybear9@gmail.com>"]
 edition = "2018"
+private = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-
-#[lib]
-#name = "typesharp"
+[dependencies]

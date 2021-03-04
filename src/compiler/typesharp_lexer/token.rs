@@ -2,9 +2,9 @@ use crate::{ compiler::typesharp_ast::{ Span, Position } };
 use crate::{ compiler::typesharp_ast::Cursor };
 
 pub struct Token {
-     kind: TokenKind,
-     span: Span,
-     position: Position
+     pub kind: TokenKind,
+     pub span: Span,
+     pub position: Option<Position>
 }
 
 // Binary Operators
@@ -193,7 +193,7 @@ pub enum Delimiter {
 
 pub enum TokenKind {
      // A boolean, true or false
-     BoolLiteral(bool),
+     BoolLiteral(Box<str>),
 
      // End of file
      EOF,
@@ -209,7 +209,7 @@ pub enum TokenKind {
      // No idea on how I want to do this yet
      ErrorLiteral,
 
-     NumberLiteral(Numeric),
+     NumberLiteral(Box<str>),
 
      //RegularExpressionLiteral,
 
@@ -232,13 +232,29 @@ pub enum TokenKind {
 
      AssignmentLiteral(AssignmentOp),
 
+	Indent,
+
+	WhiteSpace,
+
 	// Unknown token not expected by our lexer
 	Unknown
 }
 
 impl Token {
-     pub fn new(kind: TokenKind, span: Span) -> Self {
-          return Token { kind: kind, span: span, position: span.into_position() }
+     pub fn new(kind: TokenKind, span: Span, pos: Option<Position>) -> Self {
+          return Token { kind: kind, span: span, position: pos }
+     }
+}
+
+impl std::fmt::Display for TokenKind {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+          match *self {
+			TokenKind::CommentLiteral(_) => write!(f, "CommentLiteral"),
+			TokenKind::Comment => write!(f, "Comment"),
+			TokenKind::NumberLiteral(_) => write!(f, "Number"),
+			TokenKind::Indent | TokenKind::WhiteSpace => write!(f, "Space or Whitespace"),
+			_ => write!(f, "Unknown token.")
+		}
      }
 }
 
@@ -267,17 +283,39 @@ impl Cursor<'_> {
 			return Token {
 				kind: TokenKind::Comment,
 				span: Span::new(initpos, self.pos),
-				position: initpos
+				position: None
 			};
 		} else {
 			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
+			self.peek(); // we need this to consume this old char.
 			self.consume_while(|c| c != '*');
 			return Token {
 				kind: TokenKind::Comment,
 				span: Span::new(initpos, self.pos),
-				position: initpos
+				position: None
 			};
 		}
+	}
+
+	/// Consumes a numeric
+	/// A numeric can be one of: int, double, float, or decimal
+	/// Check: https://bavfalcon9.gitbook.io/typesharp/types/numeric-types for more information
+	/// Please note that this documentation may be outdated
+	pub fn consume_any_numeric(&mut self, initial: char) -> Token {
+		let number: String = String::from(initial);
+		// immediately check next char but don't consume
+
+		loop {
+			let next = self.first();
+
+			if !next.is_numeric() {
+				break;
+			} else {
+				number.to_owned().push(self.peek().unwrap());
+			}
+		}
+
+		return Token::new(TokenKind::NumberLiteral(number.into_boxed_str()), Span::from(self.pos), None);
 	}
 }
 
@@ -293,9 +331,17 @@ pub fn tokenize(input: &str) -> Vec<Token> {
 			'/' => match cursor.first() {
 				'/' => cursor.consume_comment(true),
 				'*' => cursor.consume_comment(false),
-				_ => Token::new(TokenKind::BinaryOpLiteral(BinOp::Slash), Span::from(cursor.pos))// probably an op
+				_ => Token::new(TokenKind::BinaryOpLiteral(BinOp::Slash), Span::from(cursor.pos), None)// probably an op
 			},
-			_ => Token::new(TokenKind::Unknown, Span::from(cursor.pos))
+
+			// numbers (parser checks for numeric types later)
+			'0'..='9' => cursor.consume_any_numeric(kind),
+
+			// whitespace (eg: space)
+			' ' => Token::new(TokenKind::WhiteSpace, Span::from(cursor.pos), None),
+
+			// unknown
+			_ => Token::new(TokenKind::Unknown, Span::from(cursor.pos), None)
 		};
 
 		tokens.push(token);
