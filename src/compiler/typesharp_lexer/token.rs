@@ -308,10 +308,10 @@ impl Cursor<'_> {
 		// consume and preserve until next space
 		let mut identifier: String = String::new();
 		if init == None {
-			identifier = self.consume_segment(|c| !c.is_whitespace() || c.is_alphanumeric());
+			identifier = self.consume_segment(|c| !c.is_whitespace() && c.is_alphanumeric());
 		} else {
 			identifier.push(*init.unwrap());
-			identifier.push_str(self.consume_segment(|c| !c.is_whitespace() || c.is_alphanumeric()).chars().as_str());
+			identifier.push_str(self.consume_segment(|c| !c.is_whitespace() && c.is_alphanumeric()).chars().as_str());
 		}
 		let span: Span = Span::new(init_pos, self.pos);
 
