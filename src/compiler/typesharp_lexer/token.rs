@@ -1,5 +1,7 @@
 use crate::{ compiler::typesharp_ast::{ Span, Position, KeyWord, Cursor } };
 
+
+#[derive(Debug)]
 pub struct Token {
      pub kind: TokenKind,
      pub span: Span,
@@ -7,6 +9,7 @@ pub struct Token {
 }
 
 // Binary Operators
+#[derive(Debug)]
 pub enum BinOp {
      // +
      Plus,
@@ -42,6 +45,7 @@ pub enum BinOp {
      UShr,
 }
 
+#[derive(Debug)]
 pub enum UnaryOp {
      // ++x
      IncP,
@@ -71,6 +75,7 @@ pub enum UnaryOp {
      Object,
 }
 
+#[derive(Debug)]
 pub enum LogicalOp {
      // x && y
      And,
@@ -82,6 +87,7 @@ pub enum LogicalOp {
      Coalasce,
 }
 
+#[derive(Debug)]
 pub enum ComparisonOp {
      Eq,
 
@@ -102,7 +108,7 @@ pub enum ComparisonOp {
      InstanceOf,
 }
 
-// todo: AssignmentOps?
+#[derive(Debug)]
 pub enum AssignmentOp {
      // x += y
      Add,
@@ -141,6 +147,7 @@ pub enum AssignmentOp {
      Coalesce,
 }
 
+#[derive(Debug)]
 pub enum Numeric {
      /// @reference https://doc.rust-lang.org/beta/reference/types/numeric.html
      /// Floating number
@@ -168,6 +175,7 @@ pub enum Numeric {
      Hexadecimal,
 }
 
+#[derive(Debug)]
 pub enum Comment {
      /// Line of the comment
      Line(Span),
@@ -176,6 +184,7 @@ pub enum Comment {
      Block(String),
 }
 
+#[derive(Debug)]
 pub enum Delimiter {
      /// Parenthesis, either "(" or ")"
      Paren,
@@ -190,6 +199,7 @@ pub enum Delimiter {
      NoDelim,
 }
 
+#[derive(Debug)]
 pub enum TokenKind {
      // A boolean, true or false
      BoolLiteral(Box<str>),
@@ -200,7 +210,7 @@ pub enum TokenKind {
 	Keyword(KeyWord),
 
      // A identifier (const x = 0) where x is the identifier
-     Identifier(Box<str>),
+     Identifier(String),
 
      //Keyword(Keyword),
 
@@ -238,7 +248,7 @@ pub enum TokenKind {
 	WhiteSpace,
 
 	// Unknown token not expected by our lexer
-	Unknown
+	Unknown(String)
 }
 
 impl Token {
@@ -258,7 +268,7 @@ macro_rules! token {
 		Token::new($kind, $span, None);
 	};
 	() => {
-		Token::build(TokenKind::Unknown, Position::new(0, 0));
+		Token::build(TokenKind::Unknown(String::from("")), Position::new(0, 0));
 	};
 }
 
@@ -282,18 +292,27 @@ impl std::fmt::Display for TokenKind {
 impl Cursor<'_> {
 	/// Definitely tries to consume a token.
 	/// If it can't, we panic.
-	pub fn consume_token(&mut self) -> Token {
-		return token!();
+	pub fn consume_token(&mut self, init: &char) -> Token {
+		return match init {
+			'a'..='z' => self.consume_keyword_or_identifier(Some(init)),
+			_ => token!(TokenKind::Unknown(init.to_string()), Span::from(self.pos))
+		};
 	}
 
 	/// Indefinitely consume until we match whitespace.
 	/// This will resolve keywords into tokens if found,
 	/// if not found, will return a token in the form of a
 	/// **VALID** identifier.
-	pub fn consume_keyword_or_identifier(&mut self) -> Token {
+	pub fn consume_keyword_or_identifier(&mut self, init: Option<&char>) -> Token {
 		let init_pos: Position = self.pos;
 		// consume and preserve until next space
-		let identifier: String = self.consume_segment(|c| !c.is_whitespace() || !c.is_ascii_alphanumeric());
+		let mut identifier: String = String::new();
+		if init == None {
+			identifier = self.consume_segment(|c| !c.is_whitespace() || c.is_alphanumeric());
+		} else {
+			identifier.push(*init.unwrap());
+			identifier.push_str(self.consume_segment(|c| !c.is_whitespace() || c.is_alphanumeric()).chars().as_str());
+		}
 		let span: Span = Span::new(init_pos, self.pos);
 
 		match &identifier[..] {
@@ -369,12 +388,13 @@ impl Cursor<'_> {
 			"interface" => token!(TokenKind::Keyword(KeyWord::Interface), span),
 
 			// Wasn't a keyword, it was an identifier
-			_ => token!(TokenKind::Identifier(identifier.into_boxed_str()), span)
+			_ => token!(TokenKind::Identifier(identifier), span)
 		}
 	}
 
 	/// Consumes an inline or multiline comment.
 	pub fn consume_comment(&mut self, inline: bool) -> Token {
+		println!("Eating comment.");
 		if inline == true {
 			// consume while
 			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
@@ -416,7 +436,8 @@ pub fn tokenize(input: &str) -> Vec<Token> {
 	let mut tokens: Vec<Token> = Vec::new();
 
 	while !cursor.is_eof() {
-		let kind = cursor.peek().unwrap_or_default();
+		let kind = cursor.peek().unwrap();
+
 		let token: Token = match kind {
 			// comments
 			'/' => match cursor.first() {
@@ -432,7 +453,7 @@ pub fn tokenize(input: &str) -> Vec<Token> {
 			' ' => Token::new(TokenKind::WhiteSpace, Span::from(cursor.pos), None),
 
 			// unknown
-			_ => cursor.consume_token() //.unwrap_or(token!(TokenKind::Unknown))
+			_ => cursor.consume_token(&kind) //.unwrap_or(token!(TokenKind::Unknown))
 		};
 
 		tokens.push(token);

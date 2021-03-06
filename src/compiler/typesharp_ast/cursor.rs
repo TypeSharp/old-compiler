@@ -4,7 +4,7 @@ use crate::{ compiler::typesharp_ast::{ Position } };
 pub struct Cursor<'a> {
      init_length: usize,
      chars: Chars<'a>,
-     previous: char,
+     pub previous: char,
 	pub pos: Position
 }
 
@@ -83,7 +83,7 @@ impl<'a> Cursor<'a> {
 	/// Consumes chars until the predicate returns false, or until the end of file is met, and returns the offspring.
 	pub fn consume_segment(&mut self, mut pred: impl FnMut(char) -> bool) -> String {
 		let mut segment = String::new();
-		while !self.is_eof() && pred(self.first()) {
+		while !self.is_eof() && pred(self.first()) == true {
 			segment.push(self.peek().unwrap());
 		}
 		return segment;

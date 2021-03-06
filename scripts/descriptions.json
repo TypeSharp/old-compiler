@@ -1,4 +1,5 @@
 {
-	"compiler": "Home of the TypeSharp Compiler.",
-	"error": "Home of the Typesharp Error Handling."
+	"compiler": "The TypeSharp Compiler.",
+	"error": "Typesharp Error Handling.",
+	"cli": "Typesharp CLI (Command Line Interface)."
 }
