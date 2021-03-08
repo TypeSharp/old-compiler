@@ -243,6 +243,8 @@ pub enum TokenKind {
 
      AssignmentLiteral(AssignmentOp),
 
+	ExpressionTerminator,
+
 	Indent,
 
 	WhiteSpace,
@@ -295,6 +297,7 @@ impl Cursor<'_> {
 	pub fn consume_token(&mut self, init: &char) -> Token {
 		return match init {
 			'a'..='z' => self.consume_keyword_or_identifier(Some(init)),
+			';' => token!(TokenKind::ExpressionTerminator, Span::from(self.pos)),
 			_ => token!(TokenKind::Unknown(init.to_string()), Span::from(self.pos))
 		};
 	}
@@ -394,7 +397,6 @@ impl Cursor<'_> {
 
 	/// Consumes an inline or multiline comment.
 	pub fn consume_comment(&mut self, inline: bool) -> Token {
-		println!("Eating comment.");
 		if inline == true {
 			// consume while
 			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
@@ -413,20 +415,11 @@ impl Cursor<'_> {
 	/// Check: https://bavfalcon9.gitbook.io/typesharp/types/numeric-types for more information
 	/// Please note that this documentation may be outdated
 	pub fn consume_any_numeric(&mut self, initial: char) -> Token {
-		let number: String = String::from(initial);
+		let mut number: String = String::from(initial);
+		let init_pos: Position = self.pos;
 		// immediately check next char but don't consume
-
-		loop {
-			let next = self.first();
-
-			if !next.is_numeric() {
-				break;
-			} else {
-				number.to_owned().push(self.peek().unwrap());
-			}
-		}
-
-		return Token::new(TokenKind::NumberLiteral(number.into_boxed_str()), Span::from(self.pos), None);
+		number.push_str(self.consume_segment(|c| c.is_numeric() || c == '.').chars().as_str());
+		return Token::new(TokenKind::NumberLiteral(number.into_boxed_str()), Span::new(init_pos, self.pos), None);
 	}
 }
 

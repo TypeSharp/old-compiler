@@ -1,12 +1,19 @@
 pub mod compiler;
+pub mod parser_h::{ parser, compile };
 
 fn main() {
-	let code = "const: string hi = 10;";
+	let code = "import std;
+	const mychild: string = 10;
+	const newval = (int) mychild;
+	debug!(newval); // Number<u8, 10>
+	";
 	let lexed = compiler::typesharp_lexer::tokenize(&code);
-
-	//println!("There are: {} tokens.", lexed.len());
+	let val = lexed.len();
 
 	for token in lexed {
 		println!("Found: {:?}", token);
 	}
+
+	println!("There are: {} tokens. Parsing and executing now.", val);
+	compile(parser::parse(lexed));
 }
