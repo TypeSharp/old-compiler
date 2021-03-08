@@ -1,5 +1,5 @@
 pub mod compiler;
-pub mod parser_h::{ parser, compile };
+//pub mod parser_h::{ parser, compile };
 
 fn main() {
 	let code = "import std;
@@ -14,6 +14,6 @@ fn main() {
 		println!("Found: {:?}", token);
 	}
 
-	println!("There are: {} tokens. Parsing and executing now.", val);
-	compile(parser::parse(lexed));
+	println!("There are: {} tokens.", val);
+	//compile(parser::parse(lexed));
 }
