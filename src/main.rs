@@ -3,10 +3,10 @@ pub mod compiler;
 
 fn main() {
 	let code = "import std;
-	const mychild: string = 10;
+	/*const mychild: string = 10;
 	const newval = (int) mychild;
 	debug!(newval); // Number<u8, 10>
-	";
+	*/";
 	let lexed = compiler::typesharp_lexer::tokenize(&code);
 	let val = lexed.len();
 

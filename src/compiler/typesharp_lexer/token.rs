@@ -1,4 +1,6 @@
-use crate::{ compiler::typesharp_ast::{ Span, Position, KeyWord, Cursor } };
+use crate::{
+	compiler::typesharp_ast::{ Span, Position, KeyWord, Cursor, op::* }
+};
 
 
 #[derive(Debug)]
@@ -6,145 +8,6 @@ pub struct Token {
      pub kind: TokenKind,
      pub span: Span,
      pub position: Position
-}
-
-// Binary Operators
-#[derive(Debug)]
-pub enum BinOp {
-     // +
-     Plus,
-
-     // -
-     Minus,
-
-     // *
-     Star,
-
-     // /
-     Slash,
-
-     // %
-     Percent,
-
-     // ^
-     Caret,
-
-     // &
-     And,
-
-     // |
-     Or,
-
-     // <<
-     Sh1,
-
-     // >>
-     Shr,
-
-     // >>>
-     UShr,
-}
-
-#[derive(Debug)]
-pub enum UnaryOp {
-     // ++x
-     IncP,
-
-     // x++
-     Inc,
-
-     // --x
-     DecP,
-
-     // x--
-     Dec,
-
-     // -x
-     Neg,
-
-     // +x
-     Pos,
-
-     // !x
-     Not,
-
-     // experimental delete x
-     Delete,
-
-     // A syntax sugar for x = {}
-     Object,
-}
-
-#[derive(Debug)]
-pub enum LogicalOp {
-     // x && y
-     And,
-
-     // x || y
-     Or,
-
-     // x ?? y
-     Coalasce,
-}
-
-#[derive(Debug)]
-pub enum ComparisonOp {
-     Eq,
-
-     NotEq,
-
-     GreaterThan,
-
-     GreaterThanOrEqual,
-
-     LessThan,
-
-     LessThanOrEqual,
-
-     Contains,
-
-     In,
-
-     InstanceOf,
-}
-
-#[derive(Debug)]
-pub enum AssignmentOp {
-     // x += y
-     Add,
-
-     // x -= y
-     Sub,
-
-     // x *= y
-     Mul,
-
-     // x /= y
-     Div,
-
-     // x %= y
-     Rem,
-
-     And,
-
-     Or,
-
-     Xor,
-
-     Sh1,
-
-     Shr,
-
-     Ushr,
-
-     // [EXPERIMENT] x &&= y
-     BoolAnd,
-
-     // [EXPERIMENT] x ||= y
-     BoolOr,
-
-     // [EXPERIMENT] x ??= y : Support may not be in future versions
-     Coalesce,
 }
 
 #[derive(Debug)]
@@ -296,6 +159,18 @@ impl Cursor<'_> {
 	/// If it can't, we panic.
 	pub fn consume_token(&mut self, init: &char) -> Token {
 		return match init {
+			// comments
+			'/' => match self.first() {
+				'/' => self.consume_comment(true),
+				'*' => self.consume_comment(false),
+				_ => Token::new(TokenKind::BinaryOpLiteral(BinOp::Slash), Span::from(self.pos), None)// probably an op
+			},
+
+			// numbers (parser checks for numeric types later)
+			'0'..='9' => self.consume_any_numeric(*init),
+
+			// whitespace (eg: space)
+			' ' => Token::new(TokenKind::WhiteSpace, Span::from(self.pos), None),
 			'a'..='z' => self.consume_keyword_or_identifier(Some(init)),
 			';' => token!(TokenKind::ExpressionTerminator, Span::from(self.pos)),
 			_ => token!(TokenKind::Unknown(init.to_string()), Span::from(self.pos))
@@ -406,6 +281,8 @@ impl Cursor<'_> {
 			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
 			self.peek(); // we need this to consume this old char.
 			self.consume_while(|c| c != '*');
+			self.peek();
+			self.peek(); // this is hacky, pls find fix
 			return token!(TokenKind::Comment, Span::new(initpos, self.pos));
 		}
 	}
@@ -430,25 +307,7 @@ pub fn tokenize(input: &str) -> Vec<Token> {
 
 	while !cursor.is_eof() {
 		let kind = cursor.peek().unwrap();
-
-		let token: Token = match kind {
-			// comments
-			'/' => match cursor.first() {
-				'/' => cursor.consume_comment(true),
-				'*' => cursor.consume_comment(false),
-				_ => Token::new(TokenKind::BinaryOpLiteral(BinOp::Slash), Span::from(cursor.pos), None)// probably an op
-			},
-
-			// numbers (parser checks for numeric types later)
-			'0'..='9' => cursor.consume_any_numeric(kind),
-
-			// whitespace (eg: space)
-			' ' => Token::new(TokenKind::WhiteSpace, Span::from(cursor.pos), None),
-
-			// unknown
-			_ => cursor.consume_token(&kind) //.unwrap_or(token!(TokenKind::Unknown))
-		};
-
+		let token: Token = cursor.consume_token(&kind);
 		tokens.push(token);
 	}
 
