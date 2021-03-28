@@ -170,7 +170,7 @@ impl Cursor<'_> {
 			'0'..='9' => self.consume_any_numeric(*init),
 
 			// whitespace (eg: space)
-			' ' => Token::new(TokenKind::WhiteSpace, Span::from(self.pos), None),
+			' '|'\n'|'\r'|'\t' => Token::new(TokenKind::WhiteSpace, Span::from(self.pos), None),
 			'a'..='z' => self.consume_keyword_or_identifier(Some(init)),
 			';' => token!(TokenKind::ExpressionTerminator, Span::from(self.pos)),
 			_ => token!(TokenKind::Unknown(init.to_string()), Span::from(self.pos))

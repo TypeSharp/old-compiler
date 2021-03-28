@@ -1,8 +1,9 @@
 pub mod compiler;
+pub mod error;
 //pub mod parser_h::{ parser, compile };
 
 fn main() {
-	let code = "import std;
+	let code = "use std.math;
 	/*const mychild: string = 10;
 	const newval = (int) mychild;
 	debug!(newval); // Number<u8, 10>
