@@ -64,6 +64,10 @@ pub enum Delimiter {
 
 #[derive(Debug)]
 pub enum TokenKind {
+	// Quite literally an accessor,
+	// EG: "."
+	Accessor,
+
      // A boolean, true or false
      BoolLiteral(Box<str>),
 
@@ -78,7 +82,7 @@ pub enum TokenKind {
      //Keyword(Keyword),
 
      // A string, literal. EG: Constant
-     StringLiteral,
+     StringLiteral(String),
 
      // No idea on how I want to do this yet
      ErrorLiteral,
@@ -171,10 +175,29 @@ impl Cursor<'_> {
 
 			// whitespace (eg: space)
 			' '|'\n'|'\r'|'\t' => Token::new(TokenKind::WhiteSpace, Span::from(self.pos), None),
-			'a'..='z' => self.consume_keyword_or_identifier(Some(init)),
+			'A'..='z' => self.consume_keyword_or_identifier(Some(init)),
+			'.' => panic!("Unknown"),
 			';' => token!(TokenKind::ExpressionTerminator, Span::from(self.pos)),
 			_ => token!(TokenKind::Unknown(init.to_string()), Span::from(self.pos))
 		};
+	}
+
+	/// Indefinitely consumes any word encapsulated in a string char
+	pub fn consume_any_string(&mut self, init: Option<&char>) -> Token {
+		let init_pos: Position = self.pos;
+		let mut string: String = String::new();
+
+		if init == None {
+			// there was no initial char
+			// we need to panic because it's impossible to know when we can terminate the string.
+			panic!("Unknown String");
+		} else {
+			match *init.unwrap_or(&'\'') {
+				_ => panic!("Compiler error.")
+			}
+		}
+
+		return token!(TokenKind::StringLiteral(string), Span::new(init_pos, self.pos));
 	}
 
 	/// Indefinitely consume until we match whitespace.

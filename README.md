@@ -11,6 +11,8 @@
 Typesharp is a typesafe compiled language written in rustlang aiming to memory safe and fast! <br />
 You can view the [documentation here](https://github.com/TypeSharp/Documentation).
 
+**NOTICE:** This is a rewrite of the original compiler, and therefore is public. I will not explain how to use, or interact with this source code until I am comfortable releasing the CLI.
+
 ## Why Typesharp?
 
 - Typesharp is fast, and memory safe!
@@ -20,4 +22,4 @@ You can view the [documentation here](https://github.com/TypeSharp/Documentation
 
 
 ## Installation
-- none as of now
+This is the TypeSharp source code! It **does not** contain the CLI (Command line interface) or the "errors" module which provides lint.
