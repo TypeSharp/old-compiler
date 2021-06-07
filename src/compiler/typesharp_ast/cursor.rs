@@ -1,5 +1,5 @@
 use std::str::Chars;
-use crate::{ compiler::typesharp_ast::{ Position } };
+use super::position::Position;
 
 pub struct Cursor<'a> {
      init_length: usize,

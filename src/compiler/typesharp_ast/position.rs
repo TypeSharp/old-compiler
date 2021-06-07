@@ -1,10 +1,10 @@
 use std::{ fmt, cmp::Ordering };
-use crate::{ compiler::typesharp_ast::cursor::EOF };
+use super::cursor::EOF;
 
-/**
- * This is the position that is lexed.
- * Tokens will contain a specific position, as well as lines.
- */
+///
+/// This is the position that is lexed.
+/// Tokens will contain a specific position, as well as lines.
+///
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd)]
 pub struct Position {
      line: u32,
@@ -40,10 +40,8 @@ impl fmt::Display for Position {
      }
 }
 
-/**
- * This is used for grabbing a "section" or "span"
- * of code in a file. EG: Comments.
- */
+/// This is used for grabbing a "section" or "span"
+/// of code in a file. EG: Comments.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Ord)]
 pub struct Span {
      start: Position,
