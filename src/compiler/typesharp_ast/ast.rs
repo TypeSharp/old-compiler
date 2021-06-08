@@ -12,6 +12,28 @@ pub struct AST {
 }
 
 #[derive(Clone, PartialEq, Debug)]
+pub struct IContextResource {
+	pub name: String,
+	pub contents: Vec<char>
+}
+
+pub trait IContext {
+	/// Initializes a new context
+	fn new(&self) -> Self;
+
+	// Gets the current resource to be parsed.
+	fn getCurrentResource(&self)  -> IContextResource;
+
+	/// Gets the current AST scope
+	fn getCurrentScope(&self) -> Option<&ASTStatement>;
+
+	/// Gets all AST scopes
+	fn getScopes(&self) -> Vec<ASTStatement>;
+
+	fn nextResource(&self) -> bool;
+}
+
+#[derive(Clone, PartialEq, Debug)]
 pub struct AnyContext;
 
 impl AnyContext {
@@ -40,9 +62,9 @@ pub enum ProgramType {
 pub struct Library;
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct ASTStatement {
+pub struct ASTStatement<Context = IContextResource> {
 	pub body: ASTStateBody,
-	pub context: AnyContext,
+	pub context: Context,
 	pub pos: Position
 }
 
