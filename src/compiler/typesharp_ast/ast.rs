@@ -6,14 +6,9 @@ use super::types;
 use crate::{ compiler::typesharp_lexer::token::Token };
 
 pub struct AST {
-	// name
-	n: String,
-	// // program type
-	// t: ProgramType,
-	// // Stack constants
-	// s: Vec<ASTExpr>,
-	// // Body
-	// b: Vec<ASTNode>
+	name: String,
+	typ: ProgramType,
+	body: Vec<ASTStatement>
 }
 
 #[derive(Clone, PartialEq, Debug)]
