@@ -1,4 +1,8 @@
 // This is a module that handles internal classes and types.
+pub mod builtin;
+pub mod compiler;
+use super::{ ast };
+
 #[derive(Clone, PartialEq, Debug)]
 pub struct Type {
 	pub name: String,
@@ -7,10 +11,12 @@ pub struct Type {
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct TypeDefinition {
-	pub func: TypeSignature
+	/// Used for linting and more descriptive errors
+	pub calculated_defs: Option<Vec<ast::Conditional>>,
+	pub defs: Option<Vec<ast::AnyVar>>
 }
 
-#[derive(Clone, PartialEq, Debug)]
-pub struct TypeSignature {
-	
-}
+pub use self::{
+	builtin::*,
+	compiler::*
+};

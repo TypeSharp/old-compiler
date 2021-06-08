@@ -2,6 +2,7 @@
 // use crate::{ typesharp_parser::Module };
 use super::position::{ Position };
 use super::op::*;
+use super::types;
 use crate::{ compiler::typesharp_lexer::token::Token };
 
 pub struct AST {
@@ -53,7 +54,12 @@ pub struct ASTStatement {
 #[derive(Clone, PartialEq, Debug)]
 pub enum ASTStateBody {
 	// expressions, function calls, returns etc should be here.
-	FuncCall(Signature)
+	FuncCall(Signature),
+	Expression(Expression),
+	StackVar(Var),
+	Constant(HeapVar),
+	AnyConstant(AnyVar),
+	If(Conditional)
 }
 
 // Context and definitions
@@ -61,6 +67,7 @@ pub enum ASTStateBody {
 #[derive(Clone, PartialEq, Debug)]
 pub struct Var {
 	pub op: Option<AnyOp>,
+	pub typ: Option<types::Type>,
 	pub val: Token,
 	pub pos: Position,
 	pub dies: bool,
@@ -93,7 +100,9 @@ pub struct Expression {
 	pub v: Vec<AnyVar>
 }
 
+#[derive(Clone, PartialEq, Debug)]
 pub struct Conditional {
 	pub condition: Expression,
-	pub body: Vec<ASTStatement>
+	pub body: Vec<ASTStatement>,
+	pub fin: Option<Vec<ASTStatement>>
 }
