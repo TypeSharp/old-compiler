@@ -1,5 +1,14 @@
+#[derive(Clone, PartialEq, Debug)]
+pub enum AnyOp {
+	BinOp(BinOp),
+	UnaryOp(UnaryOp),
+	LogicalOp(LogicalOp),
+	ComparisonOp(ComparisonOp),
+	AssignmentOp(AssignmentOp)
+}
+
 // Binary Operators
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum BinOp {
      // +
      Plus,
@@ -35,7 +44,7 @@ pub enum BinOp {
      UShr,
 }
 
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum UnaryOp {
      // ++x
      IncP,
@@ -65,7 +74,7 @@ pub enum UnaryOp {
      Object,
 }
 
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum LogicalOp {
      // x && y
      And,
@@ -77,7 +86,7 @@ pub enum LogicalOp {
      Coalasce,
 }
 
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum ComparisonOp {
      Eq,
 
@@ -98,7 +107,7 @@ pub enum ComparisonOp {
      InstanceOf,
 }
 
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum AssignmentOp {
      // x += y
      Add,

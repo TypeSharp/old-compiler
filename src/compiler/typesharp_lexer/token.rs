@@ -3,14 +3,14 @@ use crate::{
 };
 
 
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Token {
      pub kind: TokenKind,
      pub span: Span,
      pub position: Position
 }
 
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum Numeric {
      /// @reference https://doc.rust-lang.org/beta/reference/types/numeric.html
      /// Floating number
@@ -38,7 +38,7 @@ pub enum Numeric {
      Hexadecimal,
 }
 
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum Comment {
      /// Line of the comment
      Line(Span),
@@ -47,7 +47,7 @@ pub enum Comment {
      Block(String),
 }
 
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum Delimiter {
      /// Parenthesis, either "(" or ")"
      Paren,
@@ -62,7 +62,7 @@ pub enum Delimiter {
      NoDelim,
 }
 
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum TokenKind {
 	// Quite literally an accessor,
 	// EG: "."

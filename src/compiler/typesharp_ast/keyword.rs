@@ -2,7 +2,7 @@ use std::{error, fmt};
 
 /// These keywords are reserved.
 /// If you use these as identifiers you will be yelled at.
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum KeyWord {
 	/// Keywords available in all versions of typesharp.
 	/// Asm, allows use for inline assembly
