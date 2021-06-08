@@ -3,3 +3,10 @@
 [[package]]
 name = "runner"
 version = "0.1.0"
+dependencies = [
+ "typesharp",
+]
+
+[[package]]
+name = "typesharp"
+version = "0.1.0"
