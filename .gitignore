@@ -1,5 +1,4 @@
 target
 *-h.*
 *_h.*
-src/error/*
 keywords.yaml

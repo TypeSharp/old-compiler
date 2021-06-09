@@ -1,0 +1,18 @@
+use compiler;
+@compiler(numericTypes);
+
+
+let mutablevar: u8 = 0;
+let mutablearr: u8[];
+
+// thread test
+const handle = thread with (mutablevar) {
+	const end = (u16) proc.time() + 10;
+	while (end > proc.time()) {
+		mutablevar++;
+		mutablearr.push(proc.time());
+	}
+}
+handle.complete = fn _() {
+	println("Test Complete");
+}
