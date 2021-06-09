@@ -1,12 +1,10 @@
 pub mod ast;
-pub mod position;
+pub mod util;
 pub mod keyword;
-pub mod cursor;
-pub mod op;
 pub mod types;
 
 pub use self::{
-     position::{ Position, Span },
+     util::position::{ Position, Span },
      keyword::{ KeyWord, KeyWordError },
-	cursor::{ Cursor }
+	util::cursor::{ Cursor }
 };

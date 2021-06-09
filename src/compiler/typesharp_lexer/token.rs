@@ -1,5 +1,6 @@
 use crate::{
-	compiler::typesharp_ast::{ Span, Position, KeyWord, Cursor, op::* }
+	compiler::typesharp_ast::{ Span, Position, KeyWord, Cursor },
+	compiler::typesharp_parser::{ op::* }
 };
 
 pub type TokenType = (String, Box<str>);
@@ -302,6 +303,7 @@ impl Cursor<'_> {
 		if init == None {
 			// there was no initial char
 			// we need to panic because it's impossible to know when we can terminate the string.
+			// to-do: Implement errors.
 			panic!("Unknown String");
 		} else {
 			match *init.unwrap_or(&'\'') {
