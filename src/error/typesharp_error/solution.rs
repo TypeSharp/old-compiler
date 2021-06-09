@@ -11,7 +11,7 @@ pub trait PossibleSolutionGenerator {
 	/// Keep in mind that all AST given here is during Parsing.
 	fn is_corrective(&self, tree: ast::ASTStatement) -> bool;
 
-	/// Should check the given AST and correct it (if acclible) and return None otherwise.
+	/// Should check the given AST and correct it (if accessible) and return None otherwise.
 	fn try_correct(&self, tree: ast::ASTStatement) -> Option<PossibleSolution>;
 
 	/// Displays the correct line of code.
