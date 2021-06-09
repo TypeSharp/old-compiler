@@ -11,9 +11,9 @@ pub struct Type {
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct TypeDefinition {
-	/// Used for linting and more descriptive errors
-	pub calculated_defs: Option<Vec<ast::Conditional>>,
-	pub defs: Option<Vec<ast::AnyVar>>
+	//// Used for linting and more descriptive errors
+	// pub calculated_defs: Option<Vec<ast::Conditional>>,
+	// pub defs: Option<Vec<ast::AnyVar>>
 }
 
 pub use self::{

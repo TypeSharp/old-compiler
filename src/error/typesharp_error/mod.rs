@@ -7,14 +7,14 @@ use crate::{
 	}
 };
 
-pub struct Error {
-	context: ast::AnyContext,
-	name: String,
-	code: u64
-}
+// pub struct Error {
+// 	context: ast::AnyContext,
+// 	name: String,
+// 	code: u64
+// }
 
-impl Error {
-	fn fromFile() {
-		panic!("Method not implemented")
-	}
-}
+// impl Error {
+// 	fn fromFile() {
+// 		panic!("Method not implemented")
+// 	}
+// }

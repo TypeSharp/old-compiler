@@ -2,6 +2,7 @@ use crate::{
 	compiler::typesharp_ast::{ Span, Position, KeyWord, Cursor, op::* }
 };
 
+pub type TokenType = (String, Box<str>);
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Token {
@@ -10,6 +11,25 @@ pub struct Token {
      pub position: Position
 }
 
+impl Token {
+     pub fn new(kind: TokenKind, span: Span, pos: Option<Position>) -> Self {
+          return Token { kind: kind, span: span, position: pos.unwrap_or(Position::new(0, 0)) }
+     }
+
+	pub fn build(kind: TokenKind, pos: Position) -> Self {
+		return Token::new(kind, Span::from(pos), Some(pos));
+	}
+}
+
+/// Public trait
+/// This should be used to extract a value from a TokenKind (or related)
+/// By default, typesharp **relies** on this implementation during parsing.
+pub trait TokenValue<T> {
+	fn get(&self) -> T;
+}
+
+/// Numerics!
+/// Any numeric type can be referred to as below
 #[derive(Clone, PartialEq, Debug)]
 pub enum Numeric {
      /// @reference https://doc.rust-lang.org/beta/reference/types/numeric.html
@@ -29,37 +49,111 @@ pub enum Numeric {
      ItegerLiteralSigned128(i128),
 
      /// Any number that starts with: "0b".
-     Binary,
+     Binary(usize),
 
      /// Any number that starts with: "0o".
-     Octal,
+     Octal(usize),
 
      /// Any number that starts with: "0x".
-     Hexadecimal,
+     Hexadecimal(usize),
 }
 
+impl Numeric {
+	fn new(s: String) -> Self {
+		match s {
+			_ => Numeric::Hexadecimal(0)
+		}
+	}
+}
+
+impl TokenValue<usize> for Numeric {
+	fn get(&self) -> usize {
+		match *self {
+			Numeric::Binary(n) => n,
+			Numeric::FloatLiteral(n) => n as usize,
+			Numeric::Hexadecimal(n) => n,
+			Numeric::IntegerLiteral(n) => n as usize,
+			Numeric::IntegerLiteralBig(n) => n as usize,
+			Numeric::ItegerLiteralSigned128(n) => n as usize,
+			Numeric::Octal(n) => n,
+			_ => panic!("Unknown Numeric Type provided.")
+		}
+	}
+}
+
+impl std::fmt::Display for Numeric {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, format!("Numeric {{ {} }}", self.get())) // lazy impl, todo: properly impl
+	}
+}
+
+/// Comment Implementation
+///
+/// Block Comments:
+///  /* test */
+///
+/// Line Comments:
+///  // test
 #[derive(Clone, PartialEq, Debug)]
 pub enum Comment {
      /// Line of the comment
-     Line(Span),
+     Line(String),
 
      /// Block
      Block(String),
 }
 
+impl TokenValue<String> for Comment {
+	fn get(&self) -> String {
+		match *self {
+			Comment::Line(c) => c,
+			Comment::Block(c) => c,
+			_ => String::from("Unknown Comment")
+		}
+	}
+}
+
+impl std::fmt::Display for Comment {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match *self {
+			Comment::Line(c) => write!(f, format!("Comment<Line> {{ {} }}", c)),
+			Comment::Block(c) => write!(f, format!("Comment<Block> {{ {} }}", c)),
+			_ => panic!("Unknown Comment type") // to do: use error module.
+		}
+	}
+}
+
+/// Delimiters are defined below, each delimiter is a type of scope delarator
 #[derive(Clone, PartialEq, Debug)]
 pub enum Delimiter {
      /// Parenthesis, either "(" or ")"
-     Paren,
+     Paren(String),
 
      /// Bracket, either "[" or "]"
-     Bracket,
+     Bracket(String),
 
      /// Brace, either "{" or "}"
-     Brace,
+     Brace(String),
 
      /// No delimiter
      NoDelim,
+}
+
+impl TokenValue<String> for Delimiter {
+	fn get(&self) -> String {
+		match *self {
+			Delimiter::Paren(t) => t,
+			Delimiter::Bracket(t) => t,
+			Delimiter::NoDelim => String::from("None"),
+			_ => panic!("Unknown Delimiter")
+		}
+	}
+}
+
+impl std::fmt::Display for Delimiter {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		return write!(f, format!("Delimiter {{ {} }}", self.get()));
+	}
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -87,18 +181,18 @@ pub enum TokenKind {
      // No idea on how I want to do this yet
      ErrorLiteral,
 
-     NumberLiteral(Box<str>),
+     NumberLiteral(Numeric),
 
      //RegularExpressionLiteral,
 
      // A template string, wrapped in ``
-     TemplateLiteral(Box<str>),
+     TemplateLiteral(String),
 
      // Comment literal
      CommentLiteral(Comment),
 
 	// Using this until i get comments situated.
-	Comment,
+	// Comment,
 
      DelimiterLiteral(Delimiter),
 
@@ -106,7 +200,7 @@ pub enum TokenKind {
 
      UnaryOpLiteral(UnaryOp),
 
-     GenericType(Box<str>),
+     GenericType(String),
 
      AssignmentLiteral(AssignmentOp),
 
@@ -120,14 +214,44 @@ pub enum TokenKind {
 	Unknown(String)
 }
 
-impl Token {
-     pub fn new(kind: TokenKind, span: Span, pos: Option<Position>) -> Self {
-          return Token { kind: kind, span: span, position: pos.unwrap_or(Position::new(0, 0)) }
-     }
+impl TokenKind {
+	/// Gets the token as a string value
+	fn as_str(&self) -> String {
+		match *self {
+			TokenKind::Accessor => String::from("."),
+			TokenKind::BoolLiteral(v) => String::from(v),
+			TokenKind::EOF => String::from("EOF"),
+			TokenKind::Keyword(v) => v.get(),
+			TokenKind::Identifier(v) => v,
+			TokenKind::StringLiteral(v) => v,
+			TokenKind::ErrorLiteral => String::from("Error"),
+			TokenKind::NumberLiteral(n) => format!("{}", n.get()),
+			TokenKind::TemplateLiteral(v) => v,
+			TokenKind::CommentLiteral(c) => c.get(),
+			TokenKind::DelimiterLiteral(v) => v.get(),
+			TokenKind::BinaryOpLiteral(v) => String::from("Op unknown"),
+			TokenKind::UnaryOpLiteral(v) => String::from("Op unknown"),
+			TokenKind::GenericType(v) => String::from("Op unknown"),
+			TokenKind::AssignmentLiteral(v) => String::from("Op unknown"),
+			TokenKind::ExpressionTerminator => String::from("Expression Terminated"),
+			TokenKind::Indent => String::from(""),
+			TokenKind::WhiteSpace => String::from(" "),
+			TokenKind::Unknown(v) => v,
+			_ => panic!("Uknown Token")
 
-	pub fn build(kind: TokenKind, pos: Position) -> Self {
-		return Token::new(kind, Span::from(pos), Some(pos));
+		}
 	}
+}
+
+impl std::fmt::Display for TokenKind {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+          match *self {
+			TokenKind::CommentLiteral(_) => write!(f, "CommentLiteral"),
+			TokenKind::NumberLiteral(_) => write!(f, "Number"),
+			TokenKind::Indent | TokenKind::WhiteSpace => write!(f, "Space or Whitespace"),
+			_ => write!(f, "Unknown token.")
+		}
+     }
 }
 
 // A macro utility for ease of use with token.
@@ -139,18 +263,6 @@ macro_rules! token {
 	() => {
 		Token::build(TokenKind::Unknown(String::from("")), Position::new(0, 0));
 	};
-}
-
-impl std::fmt::Display for TokenKind {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-          match *self {
-			TokenKind::CommentLiteral(_) => write!(f, "CommentLiteral"),
-			TokenKind::Comment => write!(f, "Comment"),
-			TokenKind::NumberLiteral(_) => write!(f, "Number"),
-			TokenKind::Indent | TokenKind::WhiteSpace => write!(f, "Space or Whitespace"),
-			_ => write!(f, "Unknown token.")
-		}
-     }
 }
 
 // I don't want to do this lallalalaala
@@ -298,15 +410,15 @@ impl Cursor<'_> {
 		if inline == true {
 			// consume while
 			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
-			self.consume_while(|c| c != '\n');
-			return token!(TokenKind::Comment, Span::new(initpos, self.pos));
+			let block: String = self.consume_segment(|c| c != '\n');
+			return token!(TokenKind::CommentLiteral(Comment::Block(block)), Span::new(initpos, self.pos));
 		} else {
 			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
 			self.peek(); // we need this to consume this old char.
-			self.consume_while(|c| c != '*');
+			let seg: String = self.consume_segment(|c| c != '*');
 			self.peek();
 			self.peek(); // this is hacky, pls find fix
-			return token!(TokenKind::Comment, Span::new(initpos, self.pos));
+			return token!(TokenKind::CommentLiteral(Comment::Line(seg)), Span::new(initpos, self.pos));
 		}
 	}
 
@@ -319,7 +431,7 @@ impl Cursor<'_> {
 		let init_pos: Position = self.pos;
 		// immediately check next char but don't consume
 		number.push_str(self.consume_segment(|c| c.is_numeric() || c == '.').chars().as_str());
-		return Token::new(TokenKind::NumberLiteral(number.into_boxed_str()), Span::new(init_pos, self.pos), None);
+		return Token::new(TokenKind::NumberLiteral(Numeric::new(number)), Span::new(init_pos, self.pos), None);
 	}
 }
 
