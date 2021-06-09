@@ -6,6 +6,7 @@ use crate::{
 	}
 };
 
+
 /// A enum that is a representation of error types.
 /// The errors represented here are errors that are related to 
 /// The compilers syntax-checking.
@@ -52,11 +53,15 @@ pub enum ErrFeature {
 	ReadFault,
 }
 
-pub struct ErrCustom {}
+
+/// Trait that all compiler-level errors adhere to.
+trait ErrImpl {
+    fn to_str(&self) -> &'static str;
+}
 
 
-impl ErrGeneral {
-	pub fn to_str(&self) -> &'static str {
+impl ErrImpl for ErrGeneral {
+	fn to_str(&self) -> &'static str {
 		match *self {
 			ErrGeneral::Error => "Syntax Error",
 			ErrGeneral::Fatal => "Fatal Error",
@@ -67,10 +72,10 @@ impl ErrGeneral {
 	}
 }
 
-impl ErrFeature {
-	pub fn to_str(&self) -> &'static str {
+impl ErrImpl for ErrFeature {
+	fn to_str(&self) -> &'static str {
 		match *self {
-		    ErrFeature::Success => "Sucess",
+		     ErrFeature::Success => "Sucess",
 			ErrFeature::InvalidHandle => "Invalid Handle being accessed",
 			ErrFeature::NotEnoughMemory => "Note enough memory available",
 			ErrFeature::WriteFault => "Unable to write to certain destination.",
