@@ -88,7 +88,7 @@ impl TokenValue<usize> for Numeric {
 
 impl std::fmt::Display for Numeric {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, format!("Numeric {{ {} }}", self.get())) // lazy impl, todo: properly impl
+		write!(f, "0") // lazy impl, todo: properly impl
 	}
 }
 
@@ -110,20 +110,18 @@ pub enum Comment {
 
 impl TokenValue<String> for Comment {
 	fn get(&self) -> String {
-		match *self {
-			Comment::Line(c) => c,
-			Comment::Block(c) => c,
-			_ => String::from("Unknown Comment"),
+		match self {
+			Comment::Line(c) => c.to_string(),
+			Comment::Block(c) => c.to_string()
 		}
 	}
 }
 
 impl std::fmt::Display for Comment {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match *self {
-			Comment::Line(c) => write!(f, format!("Comment<Line> {{ {} }}", c)),
-			Comment::Block(c) => write!(f, format!("Comment<Block> {{ {} }}", c)),
-			_ => panic!("Unknown Comment type"), // to do: use error module.
+		match self {
+			Comment::Line(c) => write!(f, "Comment<Line> {{ {} }}", c),
+			Comment::Block(c) => write!(f, "Comment<Block> {{ {} }}", c)
 		}
 	}
 }
@@ -146,9 +144,9 @@ pub enum Delimiter {
 
 impl TokenValue<String> for Delimiter {
 	fn get(&self) -> String {
-		match *self {
-			Delimiter::Paren(t) => t,
-			Delimiter::Bracket(t) => t,
+		match self {
+			Delimiter::Paren(t) => t.to_string(),
+			Delimiter::Bracket(t) => t.to_string(),
 			Delimiter::NoDelim => String::from("None"),
 			_ => panic!("Unknown Delimiter"),
 		}
@@ -157,7 +155,7 @@ impl TokenValue<String> for Delimiter {
 
 impl std::fmt::Display for Delimiter {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		return write!(f, format!("Delimiter {{ {} }}", self.get()));
+		return write!(f, "Delimiter {{ {} }}", self.get());
 	}
 }
 
@@ -168,7 +166,7 @@ pub enum TokenKind {
 	Accessor,
 
 	// A boolean, true or false
-	BoolLiteral(Box<str>),
+	BoolLiteral(String),
 
 	// End of file
 	EOF,
@@ -221,16 +219,16 @@ pub enum TokenKind {
 impl TokenKind {
 	/// Gets the token as a string value
 	fn as_str(&self) -> String {
-		match *self {
+		match self {
 			TokenKind::Accessor => String::from("."),
 			TokenKind::BoolLiteral(v) => String::from(v),
 			TokenKind::EOF => String::from("EOF"),
 			TokenKind::Keyword(v) => v.get(),
-			TokenKind::Identifier(v) => v,
-			TokenKind::StringLiteral(v) => v,
+			TokenKind::Identifier(v) => v.to_string(),
+			TokenKind::StringLiteral(v) => v.to_string(),
 			TokenKind::ErrorLiteral => String::from("Error"),
 			TokenKind::NumberLiteral(n) => format!("{}", n.get()),
-			TokenKind::TemplateLiteral(v) => v,
+			TokenKind::TemplateLiteral(v) => v.to_string(),
 			TokenKind::CommentLiteral(c) => c.get(),
 			TokenKind::DelimiterLiteral(v) => v.get(),
 			TokenKind::BinaryOpLiteral(v) => String::from("Op unknown"),
@@ -240,8 +238,7 @@ impl TokenKind {
 			TokenKind::ExpressionTerminator => String::from("Expression Terminated"),
 			TokenKind::Indent => String::from(""),
 			TokenKind::WhiteSpace => String::from(" "),
-			TokenKind::Unknown(v) => v,
-			_ => panic!("Uknown Token"),
+			TokenKind::Unknown(v) => v.to_string()
 		}
 	}
 }
