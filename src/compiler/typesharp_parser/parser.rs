@@ -1,7 +1,4 @@
-use crate::{ compiler::{
-	typesharp_ast::ast,
-	typesharp_lexer::Token
-}};
+use crate::compiler::{typesharp_ast::ast, typesharp_lexer::Token};
 
 // pub struct TypeSharpRCTX {
 // 	pub resources: Vec<ast::IContextResource>,
@@ -17,7 +14,6 @@ use crate::{ compiler::{
 // 			current: None
 // 		}
 // 	}
-
 
 // 	// Gets the current resource to be parsed.
 // 	fn getCurrentResource(&self) -> Option<ast::IContextResource> {

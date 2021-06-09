@@ -4,144 +4,144 @@ pub enum AnyOp {
 	UnaryOp(UnaryOp),
 	LogicalOp(LogicalOp),
 	ComparisonOp(ComparisonOp),
-	AssignmentOp(AssignmentOp)
+	AssignmentOp(AssignmentOp),
 }
 
 // Binary Operators
 #[derive(Clone, PartialEq, Debug)]
 pub enum BinOp {
-     // +
-     Plus,
+	// +
+	Plus,
 
-     // -
-     Minus,
+	// -
+	Minus,
 
-     // *
-     Star,
+	// *
+	Star,
 
-     // /
-     Slash,
+	// /
+	Slash,
 
-     // %
-     Percent,
+	// %
+	Percent,
 
-     // ^
-     Caret,
+	// ^
+	Caret,
 
-     // &
-     And,
+	// &
+	And,
 
-     // |
-     Or,
+	// |
+	Or,
 
-     // <<
-     Sh1,
+	// <<
+	Sh1,
 
-     // >>
-     Shr,
+	// >>
+	Shr,
 
-     // >>>
-     UShr,
+	// >>>
+	UShr,
 }
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum UnaryOp {
-     // ++x
-     IncP,
+	// ++x
+	IncP,
 
-     // x++
-     Inc,
+	// x++
+	Inc,
 
-     // --x
-     DecP,
+	// --x
+	DecP,
 
-     // x--
-     Dec,
+	// x--
+	Dec,
 
-     // -x
-     Neg,
+	// -x
+	Neg,
 
-     // +x
-     Pos,
+	// +x
+	Pos,
 
-     // !x
-     Not,
+	// !x
+	Not,
 
-     // experimental delete x
-     Delete,
+	// experimental delete x
+	Delete,
 
-     // A syntax sugar for x = {}
-     Object,
+	// A syntax sugar for x = {}
+	Object,
 }
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum LogicalOp {
-     // x && y
-     And,
+	// x && y
+	And,
 
-     // x || y
-     Or,
+	// x || y
+	Or,
 
-     // x ?? y
-     Coalasce,
+	// x ?? y
+	Coalasce,
 }
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum ComparisonOp {
-     Eq,
+	Eq,
 
-     NotEq,
+	NotEq,
 
-     GreaterThan,
+	GreaterThan,
 
-     GreaterThanOrEqual,
+	GreaterThanOrEqual,
 
-     LessThan,
+	LessThan,
 
-     LessThanOrEqual,
+	LessThanOrEqual,
 
-     Contains,
+	Contains,
 
-     In,
+	In,
 
-     InstanceOf,
+	InstanceOf,
 }
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum AssignmentOp {
-     // x += y
-     Add,
+	// x += y
+	Add,
 
-     // x -= y
-     Sub,
+	// x -= y
+	Sub,
 
-     // x *= y
-     Mul,
+	// x *= y
+	Mul,
 
-     // x /= y
-     Div,
+	// x /= y
+	Div,
 
-     // x %= y
-     Rem,
+	// x %= y
+	Rem,
 
-     And,
+	And,
 
-     Or,
+	Or,
 
-     Xor,
+	Xor,
 
-     Sh1,
+	Sh1,
 
-     Shr,
+	Shr,
 
-     Ushr,
+	Ushr,
 
-     // [EXPERIMENT] x &&= y
-     BoolAnd,
+	// [EXPERIMENT] x &&= y
+	BoolAnd,
 
-     // [EXPERIMENT] x ||= y
-     BoolOr,
+	// [EXPERIMENT] x ||= y
+	BoolOr,
 
-     // [EXPERIMENT] x ??= y : Support may not be in future versions
-     Coalesce,
+	// [EXPERIMENT] x ??= y : Support may not be in future versions
+	Coalesce,
 }

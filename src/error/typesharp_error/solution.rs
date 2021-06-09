@@ -1,10 +1,4 @@
-use crate::{
-	compiler::{
-		typesharp_ast::ast,
-		typesharp_ast::Position,
-		typesharp_ast::Span
-	}
-};
+use crate::compiler::{typesharp_ast::ast, typesharp_ast::Position, typesharp_ast::Span};
 
 // pub trait PossibleSolutionGenerator {
 // 	/// This function should check whether or not the given AST can be corrected.
@@ -21,7 +15,7 @@ use crate::{
 pub enum PossibleSolutionType {
 	Inline,
 	Descriptive,
-	Replacement
+	Replacement,
 }
 
 // pub struct PossibleSolution {

@@ -1,5 +1,5 @@
+use crate::compiler::typesharp_lexer::token::TokenValue;
 use std::{error, fmt};
-use crate::{ compiler::typesharp_lexer::token::TokenValue };
 
 /// These keywords are reserved.
 /// If you use these as identifiers you will be yelled at.

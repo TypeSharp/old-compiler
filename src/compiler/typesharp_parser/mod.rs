@@ -1,7 +1,4 @@
-pub mod parser;
 pub mod op;
+pub mod parser;
 
-pub use self::{
-	parser::*,
-	op::*
-};
+pub use self::{op::*, parser::*};
