@@ -22,7 +22,7 @@ pub trait IContext {
 	fn new(&self) -> Self;
 
 	// Gets the current resource to be parsed.
-	fn getCurrentResource(&self)  -> IContextResource;
+	fn getCurrentResource(&self)  -> Option<IContextResource>;
 
 	/// Gets the current AST scope
 	fn getCurrentScope(&self) -> Option<&ASTStatement>;

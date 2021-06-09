@@ -20,11 +20,8 @@ impl ast::IContext for TypeSharpRCTX {
 
 
 	// Gets the current resource to be parsed.
-	fn getCurrentResource(&self) -> ast::IContextResource {
-		self.current.unwrap_or(ast::IContextResource {
-			name: String::from("None"),
-			contents: vec!()
-		})
+	fn getCurrentResource(&self) -> Option<ast::IContextResource> {
+		return self.current.clone();
 	}
 
 	/// Gets the current AST scope
@@ -38,7 +35,7 @@ impl ast::IContext for TypeSharpRCTX {
 
 	/// Gets all AST scopes
 	fn getScopes(&self) -> Vec<ast::ASTStatement> {
-		self.scopes
+		self.scopes.clone()
 	}
 
 	fn nextResource(&self) -> bool {
