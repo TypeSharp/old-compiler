@@ -303,18 +303,26 @@ impl Cursor<'_> {
 	/// Indefinitely consumes any word encapsulated in a string char
 	pub fn consume_any_string(&mut self, init: Option<&char>) -> Token {
 		let init_pos: Position = self.pos;
-		let mut string: String = String::new();
 
 		if init == None {
 			// there was no initial char
 			// we need to panic because it's impossible to know when we can terminate the string.
 			// to-do: Implement errors.
 			panic!("Unknown String");
-		} else {
-			match *init.unwrap_or(&'\'') {
-				_ => panic!("Compiler error."),
-			}
 		}
+
+		let mut previous = self.previous;
+		let string = self.consume_segment(|c| -> bool {
+			if c == *init.unwrap() {
+				if previous == '\\' {
+					return true;
+				}
+				return false;
+			} else {
+				previous = c;
+				return true;
+			}
+		});
 
 		return token!(
 			TokenKind::StringLiteral(string),
@@ -460,6 +468,10 @@ impl Cursor<'_> {
 			Span::new(init_pos, self.pos),
 			None,
 		);
+	}
+
+	pub fn last_is_escape_char(&self) -> bool {
+		return self.previous == '\\'
 	}
 }
 
