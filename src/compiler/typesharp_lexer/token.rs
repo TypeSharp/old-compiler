@@ -292,9 +292,10 @@ impl Cursor<'_> {
 			// whitespace (eg: space)
 			' ' | '\n' | '\r' | '\t' => {
 				Token::new(TokenKind::WhiteSpace, Span::from(self.pos), None)
-			}
+			},
+			'"' | '\'' => self.consume_any_string(Some(init)),
 			'A'..='z' => self.consume_keyword_or_identifier(Some(init)),
-			'.' => panic!("Unknown"),
+			'.' => token!(TokenKind::Accessor, Span::from(self.pos)),
 			';' => token!(TokenKind::ExpressionTerminator, Span::from(self.pos)),
 			_ => token!(TokenKind::Unknown(init.to_string()), Span::from(self.pos)),
 		};
@@ -323,6 +324,9 @@ impl Cursor<'_> {
 				return true;
 			}
 		});
+
+		// consume the next char because it is a string terminator and has not been consumed, (possibly fix cursor?)
+		self.peek();
 
 		return token!(
 			TokenKind::StringLiteral(string),
