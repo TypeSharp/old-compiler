@@ -1,65 +1,162 @@
 use crate::{
-	compiler::typesharp_ast::{ Span, Position, KeyWord, Cursor, op::* }
+	compiler::typesharp_ast::{Cursor, KeyWord, Position, Span},
+	compiler::typesharp_parser::op::*,
 };
 
+pub type TokenType = (String, Box<str>);
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Token {
-     pub kind: TokenKind,
-     pub span: Span,
-     pub position: Position
+	pub kind: TokenKind,
+	pub span: Span,
+	pub position: Position,
 }
 
+impl Token {
+	pub fn new(kind: TokenKind, span: Span, pos: Option<Position>) -> Self {
+		return Token {
+			kind: kind,
+			span: span,
+			position: pos.unwrap_or(Position::new(0, 0)),
+		};
+	}
+
+	pub fn build(kind: TokenKind, pos: Position) -> Self {
+		return Token::new(kind, Span::from(pos), Some(pos));
+	}
+}
+
+/// Public trait
+/// This should be used to extract a value from a TokenKind (or related)
+/// By default, typesharp **relies** on this implementation during parsing.
+pub trait TokenValue<T> {
+	fn get(&self) -> T;
+}
+
+/// Numerics!
+/// Any numeric type can be referred to as below
 #[derive(Clone, PartialEq, Debug)]
 pub enum Numeric {
-     /// @reference https://doc.rust-lang.org/beta/reference/types/numeric.html
-     /// Floating number
-     FloatLiteral(f32),
+	/// @reference https://doc.rust-lang.org/beta/reference/types/numeric.html
+	/// Floating number
+	FloatLiteral(f32),
 
-     /// Floating number that is larger than a float
-     DoubleLiteral(f64),
+	/// Floating number that is larger than a float
+	DoubleLiteral(f64),
 
-     /// Integer: const blah: int = 13910;
-     IntegerLiteral(i32),
+	/// Integer: const blah: int = 13910;
+	IntegerLiteral(i32),
 
-     /// probably going to allow types for: i64 numerically. Compiler will detect?
-     IntegerLiteralBig(i64),
+	/// probably going to allow types for: i64 numerically. Compiler will detect?
+	IntegerLiteralBig(i64),
 
-     /// idk wtf you would need this for but, its there lmfao
-     ItegerLiteralSigned128(i128),
+	/// idk wtf you would need this for but, its there lmfao
+	ItegerLiteralSigned128(i128),
 
-     /// Any number that starts with: "0b".
-     Binary,
+	/// Any number that starts with: "0b".
+	Binary(usize),
 
-     /// Any number that starts with: "0o".
-     Octal,
+	/// Any number that starts with: "0o".
+	Octal(usize),
 
-     /// Any number that starts with: "0x".
-     Hexadecimal,
+	/// Any number that starts with: "0x".
+	Hexadecimal(usize),
 }
 
+impl Numeric {
+	fn new(s: String) -> Self {
+		match s {
+			_ => Numeric::Hexadecimal(0),
+		}
+	}
+}
+
+impl TokenValue<usize> for Numeric {
+	fn get(&self) -> usize {
+		match *self {
+			Numeric::Binary(n) => n,
+			Numeric::FloatLiteral(n) => n as usize,
+			Numeric::Hexadecimal(n) => n,
+			Numeric::IntegerLiteral(n) => n as usize,
+			Numeric::IntegerLiteralBig(n) => n as usize,
+			Numeric::ItegerLiteralSigned128(n) => n as usize,
+			Numeric::Octal(n) => n,
+			_ => panic!("Unknown Numeric Type provided."),
+		}
+	}
+}
+
+impl std::fmt::Display for Numeric {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "0") // lazy impl, todo: properly impl
+	}
+}
+
+/// Comment Implementation
+///
+/// Block Comments:
+///  /* test */
+///
+/// Line Comments:
+///  // test
 #[derive(Clone, PartialEq, Debug)]
 pub enum Comment {
-     /// Line of the comment
-     Line(Span),
+	/// Line of the comment
+	Line(String),
 
-     /// Block
-     Block(String),
+	/// Block
+	Block(String),
 }
 
+impl TokenValue<String> for Comment {
+	fn get(&self) -> String {
+		match self {
+			Comment::Line(c) => c.to_string(),
+			Comment::Block(c) => c.to_string()
+		}
+	}
+}
+
+impl std::fmt::Display for Comment {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Comment::Line(c) => write!(f, "Comment<Line> {{ {} }}", c),
+			Comment::Block(c) => write!(f, "Comment<Block> {{ {} }}", c)
+		}
+	}
+}
+
+/// Delimiters are defined below, each delimiter is a type of scope delarator
 #[derive(Clone, PartialEq, Debug)]
 pub enum Delimiter {
-     /// Parenthesis, either "(" or ")"
-     Paren,
+	/// Parenthesis, either "(" or ")"
+	Paren(String),
 
-     /// Bracket, either "[" or "]"
-     Bracket,
+	/// Bracket, either "[" or "]"
+	Bracket(String),
 
-     /// Brace, either "{" or "}"
-     Brace,
+	/// Brace, either "{" or "}"
+	Brace(String),
 
-     /// No delimiter
-     NoDelim,
+	/// No delimiter
+	NoDelim,
+}
+
+impl TokenValue<String> for Delimiter {
+	fn get(&self) -> String {
+		match self {
+			Delimiter::Paren(t) => t.to_string(),
+			Delimiter::Bracket(t) => t.to_string(),
+			Delimiter::NoDelim => String::from("None"),
+			_ => panic!("Unknown Delimiter"),
+		}
+	}
+}
+
+impl std::fmt::Display for Delimiter {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		return write!(f, "Delimiter {{ {} }}", self.get());
+	}
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -68,47 +165,46 @@ pub enum TokenKind {
 	// EG: "."
 	Accessor,
 
-     // A boolean, true or false
-     BoolLiteral(Box<str>),
+	// A boolean, true or false
+	BoolLiteral(String),
 
-     // End of file
-     EOF,
+	// End of file
+	EOF,
 
 	Keyword(KeyWord),
 
-     // A identifier (const x = 0) where x is the identifier
-     Identifier(String),
+	// A identifier (const x = 0) where x is the identifier
+	Identifier(String),
 
-     //Keyword(Keyword),
+	//Keyword(Keyword),
 
-     // A string, literal. EG: Constant
-     StringLiteral(String),
+	// A string, literal. EG: Constant
+	StringLiteral(String),
 
-     // No idea on how I want to do this yet
-     ErrorLiteral,
+	// No idea on how I want to do this yet
+	ErrorLiteral,
 
-     NumberLiteral(Box<str>),
+	NumberLiteral(Numeric),
 
-     //RegularExpressionLiteral,
+	//RegularExpressionLiteral,
 
-     // A template string, wrapped in ``
-     TemplateLiteral(Box<str>),
+	// A template string, wrapped in ``
+	TemplateLiteral(String),
 
-     // Comment literal
-     CommentLiteral(Comment),
+	// Comment literal
+	CommentLiteral(Comment),
 
 	// Using this until i get comments situated.
-	Comment,
+	// Comment,
+	DelimiterLiteral(Delimiter),
 
-     DelimiterLiteral(Delimiter),
+	BinaryOpLiteral(BinOp),
 
-     BinaryOpLiteral(BinOp),
+	UnaryOpLiteral(UnaryOp),
 
-     UnaryOpLiteral(UnaryOp),
+	GenericType(String),
 
-     GenericType(Box<str>),
-
-     AssignmentLiteral(AssignmentOp),
+	AssignmentLiteral(AssignmentOp),
 
 	ExpressionTerminator,
 
@@ -117,16 +213,44 @@ pub enum TokenKind {
 	WhiteSpace,
 
 	// Unknown token not expected by our lexer
-	Unknown(String)
+	Unknown(String),
 }
 
-impl Token {
-     pub fn new(kind: TokenKind, span: Span, pos: Option<Position>) -> Self {
-          return Token { kind: kind, span: span, position: pos.unwrap_or(Position::new(0, 0)) }
-     }
+impl TokenKind {
+	/// Gets the token as a string value
+	fn as_str(&self) -> String {
+		match self {
+			TokenKind::Accessor => String::from("."),
+			TokenKind::BoolLiteral(v) => String::from(v),
+			TokenKind::EOF => String::from("EOF"),
+			TokenKind::Keyword(v) => v.get(),
+			TokenKind::Identifier(v) => v.to_string(),
+			TokenKind::StringLiteral(v) => v.to_string(),
+			TokenKind::ErrorLiteral => String::from("Error"),
+			TokenKind::NumberLiteral(n) => format!("{}", n.get()),
+			TokenKind::TemplateLiteral(v) => v.to_string(),
+			TokenKind::CommentLiteral(c) => c.get(),
+			TokenKind::DelimiterLiteral(v) => v.get(),
+			TokenKind::BinaryOpLiteral(_v) => String::from("Op unknown"),
+			TokenKind::UnaryOpLiteral(_v) => String::from("Op unknown"),
+			TokenKind::GenericType(_v) => String::from("Op unknown"),
+			TokenKind::AssignmentLiteral(_v) => String::from("Op unknown"),
+			TokenKind::ExpressionTerminator => String::from("Expression Terminated"),
+			TokenKind::Indent => String::from(""),
+			TokenKind::WhiteSpace => String::from(" "),
+			TokenKind::Unknown(v) => v.to_string()
+		}
+	}
+}
 
-	pub fn build(kind: TokenKind, pos: Position) -> Self {
-		return Token::new(kind, Span::from(pos), Some(pos));
+impl std::fmt::Display for TokenKind {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match *self {
+			TokenKind::CommentLiteral(_) => write!(f, "CommentLiteral"),
+			TokenKind::NumberLiteral(_) => write!(f, "Number"),
+			TokenKind::Indent | TokenKind::WhiteSpace => write!(f, "Space or Whitespace"),
+			_ => write!(f, "Unknown token."),
+		}
 	}
 }
 
@@ -139,18 +263,6 @@ macro_rules! token {
 	() => {
 		Token::build(TokenKind::Unknown(String::from("")), Position::new(0, 0));
 	};
-}
-
-impl std::fmt::Display for TokenKind {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-          match *self {
-			TokenKind::CommentLiteral(_) => write!(f, "CommentLiteral"),
-			TokenKind::Comment => write!(f, "Comment"),
-			TokenKind::NumberLiteral(_) => write!(f, "Number"),
-			TokenKind::Indent | TokenKind::WhiteSpace => write!(f, "Space or Whitespace"),
-			_ => write!(f, "Unknown token.")
-		}
-     }
 }
 
 // I don't want to do this lallalalaala
@@ -167,37 +279,59 @@ impl Cursor<'_> {
 			'/' => match self.first() {
 				'/' => self.consume_comment(true),
 				'*' => self.consume_comment(false),
-				_ => Token::new(TokenKind::BinaryOpLiteral(BinOp::Slash), Span::from(self.pos), None)// probably an op
+				_ => Token::new(
+					TokenKind::BinaryOpLiteral(BinOp::Slash),
+					Span::from(self.pos),
+					None,
+				), // probably an op
 			},
 
 			// numbers (parser checks for numeric types later)
 			'0'..='9' => self.consume_any_numeric(*init),
 
 			// whitespace (eg: space)
-			' '|'\n'|'\r'|'\t' => Token::new(TokenKind::WhiteSpace, Span::from(self.pos), None),
+			' ' | '\n' | '\r' | '\t' => {
+				Token::new(TokenKind::WhiteSpace, Span::from(self.pos), None)
+			},
+			'"' | '\'' => self.consume_any_string(Some(init)),
 			'A'..='z' => self.consume_keyword_or_identifier(Some(init)),
-			'.' => panic!("Unknown"),
+			'.' => token!(TokenKind::Accessor, Span::from(self.pos)),
 			';' => token!(TokenKind::ExpressionTerminator, Span::from(self.pos)),
-			_ => token!(TokenKind::Unknown(init.to_string()), Span::from(self.pos))
+			_ => token!(TokenKind::Unknown(init.to_string()), Span::from(self.pos)),
 		};
 	}
 
 	/// Indefinitely consumes any word encapsulated in a string char
 	pub fn consume_any_string(&mut self, init: Option<&char>) -> Token {
 		let init_pos: Position = self.pos;
-		let mut string: String = String::new();
 
 		if init == None {
 			// there was no initial char
 			// we need to panic because it's impossible to know when we can terminate the string.
+			// to-do: Implement errors.
 			panic!("Unknown String");
-		} else {
-			match *init.unwrap_or(&'\'') {
-				_ => panic!("Compiler error.")
-			}
 		}
 
-		return token!(TokenKind::StringLiteral(string), Span::new(init_pos, self.pos));
+		let mut previous = self.previous;
+		let string = self.consume_segment(|c| -> bool {
+			if c == *init.unwrap() {
+				if previous == '\\' {
+					return true;
+				}
+				return false;
+			} else {
+				previous = c;
+				return true;
+			}
+		});
+
+		// consume the next char because it is a string terminator and has not been consumed, (possibly fix cursor?)
+		self.peek();
+
+		return token!(
+			TokenKind::StringLiteral(string),
+			Span::new(init_pos, self.pos)
+		);
 	}
 
 	/// Indefinitely consume until we match whitespace.
@@ -212,7 +346,11 @@ impl Cursor<'_> {
 			identifier = self.consume_segment(|c| !c.is_whitespace() && c.is_alphanumeric());
 		} else {
 			identifier.push(*init.unwrap());
-			identifier.push_str(self.consume_segment(|c| !c.is_whitespace() && c.is_alphanumeric()).chars().as_str());
+			identifier.push_str(
+				self.consume_segment(|c| !c.is_whitespace() && c.is_alphanumeric())
+					.chars()
+					.as_str(),
+			);
 		}
 		let span: Span = Span::new(init_pos, self.pos);
 
@@ -289,7 +427,7 @@ impl Cursor<'_> {
 			"interface" => token!(TokenKind::Keyword(KeyWord::Interface), span),
 
 			// Wasn't a keyword, it was an identifier
-			_ => token!(TokenKind::Identifier(identifier), span)
+			_ => token!(TokenKind::Identifier(identifier), span),
 		}
 	}
 
@@ -298,15 +436,21 @@ impl Cursor<'_> {
 		if inline == true {
 			// consume while
 			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
-			self.consume_while(|c| c != '\n');
-			return token!(TokenKind::Comment, Span::new(initpos, self.pos));
+			let block: String = self.consume_segment(|c| c != '\n');
+			return token!(
+				TokenKind::CommentLiteral(Comment::Block(block)),
+				Span::new(initpos, self.pos)
+			);
 		} else {
 			let initpos: Position = self.pos; // maniuplation of this really doesn't affect anything
 			self.peek(); // we need this to consume this old char.
-			self.consume_while(|c| c != '*');
+			let seg: String = self.consume_segment(|c| c != '*');
 			self.peek();
 			self.peek(); // this is hacky, pls find fix
-			return token!(TokenKind::Comment, Span::new(initpos, self.pos));
+			return token!(
+				TokenKind::CommentLiteral(Comment::Line(seg)),
+				Span::new(initpos, self.pos)
+			);
 		}
 	}
 
@@ -318,14 +462,26 @@ impl Cursor<'_> {
 		let mut number: String = String::from(initial);
 		let init_pos: Position = self.pos;
 		// immediately check next char but don't consume
-		number.push_str(self.consume_segment(|c| c.is_numeric() || c == '.').chars().as_str());
-		return Token::new(TokenKind::NumberLiteral(number.into_boxed_str()), Span::new(init_pos, self.pos), None);
+		number.push_str(
+			self.consume_segment(|c| c.is_numeric() || c == '.')
+				.chars()
+				.as_str(),
+		);
+		return Token::new(
+			TokenKind::NumberLiteral(Numeric::new(number)),
+			Span::new(init_pos, self.pos),
+			None,
+		);
+	}
+
+	pub fn last_is_escape_char(&self) -> bool {
+		return self.previous == '\\'
 	}
 }
 
 /// Tokenize an input into a iterator of tokens.
 pub fn tokenize(input: &str) -> Vec<Token> {
-     let mut cursor = Cursor::new(input);
+	let mut cursor = Cursor::new(input);
 	let mut tokens: Vec<Token> = Vec::new();
 
 	while !cursor.is_eof() {

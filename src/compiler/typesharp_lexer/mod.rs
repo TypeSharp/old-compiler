@@ -1,5 +1,3 @@
 pub mod token;
 
-pub use self::{
-     token::{ Token, TokenKind, tokenize },
-};
+pub use self::token::{tokenize, Token, TokenKind};

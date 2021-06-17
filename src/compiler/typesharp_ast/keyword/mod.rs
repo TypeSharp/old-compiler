@@ -1,3 +1,4 @@
+use crate::compiler::typesharp_lexer::token::TokenValue;
 use std::{error, fmt};
 
 /// These keywords are reserved.
@@ -315,6 +316,12 @@ impl KeyWord {
 			"interface" => Self::Interface,
 			_ => panic!("Unknown Keyword!"),
 		}
+	}
+}
+
+impl TokenValue<String> for KeyWord {
+	fn get(&self) -> String {
+		String::from(self.as_str())
 	}
 }
 

@@ -2,4 +2,4 @@
 # Compiler - The TypeSharp Compiler.
  - **[typesharp_ast](https://github.com/TypeSharp/Typesharp/tree/master/src/compiler/typesharp_ast)** - Package that contains abstract syntax tree tokens for typesharp.
  - **[typesharp_lexer](https://github.com/TypeSharp/Typesharp/tree/master/src/compiler/typesharp_lexer)** - Lexing utilities, help parse tokens in to AST.
- - **[typesharp_parser](https://github.com/TypeSharp/Typesharp/tree/master/src/compiler/typesharp_parser)** - The typesharp parser is responsible for "parsing" or identifying tokens after `tokenization`.
+ - **[typesharp_parser](https://github.com/TypeSharp/Typesharp/tree/master/src/compiler/typesharp_parser)** - The typesharp parser is responsible for "parsing" or identifying tokens after `tokenization`.

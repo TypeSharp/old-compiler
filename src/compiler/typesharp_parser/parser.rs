@@ -1,48 +1,44 @@
-use crate::{ compiler::{
-	typesharp_ast::ast,
-	typesharp_lexer::Token
-}};
+use crate::compiler::{typesharp_ast::ast, typesharp_lexer::Token};
 
-pub struct TypeSharpRCTX {
-	pub resources: Vec<ast::IContextResource>,
-	pub scopes: Vec<ast::ASTStatement>,
-	pub current: Option<ast::IContextResource>
-}
+// pub struct TypeSharpRCTX {
+// 	pub resources: Vec<ast::IContextResource>,
+// 	pub scopes: Vec<ast::ASTStatement>,
+// 	pub current: Option<ast::IContextResource>
+// }
 
-impl ast::IContext for TypeSharpRCTX {
-	fn new(&self) -> Self {
-		return Self {
-			resources: vec!(),
-			scopes: vec!(),
-			current: None
-		}
-	}
+// impl ast::IContext for TypeSharpRCTX {
+// 	fn new(&self) -> Self {
+// 		return Self {
+// 			resources: vec!(),
+// 			scopes: vec!(),
+// 			current: None
+// 		}
+// 	}
 
+// 	// Gets the current resource to be parsed.
+// 	fn getCurrentResource(&self) -> Option<ast::IContextResource> {
+// 		return self.current.clone();
+// 	}
 
-	// Gets the current resource to be parsed.
-	fn getCurrentResource(&self) -> Option<ast::IContextResource> {
-		return self.current.clone();
-	}
+// 	/// Gets the current AST scope
+// 	fn getCurrentScope(&self) -> Option<&ast::ASTStatement> {
+// 		if self.scopes.len() > 0 {
+// 			self.scopes.get(self.scopes.len())
+// 		} else {
+// 			None
+// 		}
+// 	}
 
-	/// Gets the current AST scope
-	fn getCurrentScope(&self) -> Option<&ast::ASTStatement> {
-		if self.scopes.len() > 0 {
-			self.scopes.get(self.scopes.len())
-		} else {
-			None
-		}
-	}
+// 	/// Gets all AST scopes
+// 	fn getScopes(&self) -> Vec<ast::ASTStatement> {
+// 		self.scopes.clone()
+// 	}
 
-	/// Gets all AST scopes
-	fn getScopes(&self) -> Vec<ast::ASTStatement> {
-		self.scopes.clone()
-	}
+// 	fn nextResource(&self) -> bool {
+// 		true
+// 	}
+// }
 
-	fn nextResource(&self) -> bool {
-		true
-	}
-}
-
-// Typesharp parser
-pub fn parse(mut curr: &ast::AST, tokens: &Vec<Token>) {
-}
+// // Typesharp parser
+// pub fn parse(mut curr: &ast::AST, tokens: &Vec<Token>) {
+// }

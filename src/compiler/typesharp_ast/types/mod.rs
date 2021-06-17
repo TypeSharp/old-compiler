@@ -1,22 +1,13 @@
 // This is a module that handles internal classes and types.
-pub mod builtin;
-pub mod compiler;
-use super::{ ast };
+use crate::{ compiler::typesharp_lexer::Token };
 
-#[derive(Clone, PartialEq, Debug)]
 pub struct Type {
-	pub name: String,
-	pub statement: TypeDefinition
+	pub kind: TypeKinds,
+	pub tokens: Option<Vec<Token>>
 }
 
-#[derive(Clone, PartialEq, Debug)]
-pub struct TypeDefinition {
-	/// Used for linting and more descriptive errors
-	pub calculated_defs: Option<Vec<ast::Conditional>>,
-	pub defs: Option<Vec<ast::AnyVar>>
+pub enum TypeKinds {
+	RawPtr,
+	AClass,
+	ARef
 }
-
-pub use self::{
-	builtin::*,
-	compiler::*
-};
